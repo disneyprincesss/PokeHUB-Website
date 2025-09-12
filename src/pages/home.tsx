@@ -1,4 +1,5 @@
 import Navbar from "../components/navbar";
+import LibraryPage from "./library";
 
 export default function HomePage() {
 
@@ -29,21 +30,21 @@ export default function HomePage() {
             <img
               src="/image/nameLogo.png"
               alt="PokeHUB"
-              className="h-48 logo cursor-pointer -mt-6 hover:scale-105 transition-transform ease-in-out duration-300"
+              className="h-48 logo -mt-6 hover:scale-105 transition-transform ease-in-out duration-900"
             />
             <p className="font-revalia text-xl text-center">
               All the Pokémon Knowledge in One Place.
             </p>
             <div className="flex gap-8 mt-6">
-              {/* <button className="bg-[#DE4040] hover:bg-[#CC4242] text-zinc-200 font-pixelify text-2xl py-2 px-4 rounded-xl shadow-md hover:translate-y-0.5 transition-all duration-100">
-                <a href="#">Library</a>
+              <button className="bg-[#DE4040] hover:bg-[#CC4242] text-zinc-200 font-pixelify text-2xl py-2 px-4 rounded-xl shadow-md hover:translate-y-0.5 transition-all duration-100">
+                <a href="/library">Library</a>
               </button>
               <button className="hover:bg-[#CC4242] text-[#DE4040] hover:text-zinc-200 font-pixelify text-2xl py-2 px-4 rounded-xl outline-2 outline-[#CC4242] hover:translate-y-0.5 transition-all duration-100">
                 <a href="#">Battle</a>
-              </button> */}
-              <button className="bg-[#DE4040] hover:bg-[#CC4242] text-zinc-200 font-pixelify text-2xl py-2 px-4 rounded-xl shadow-md hover:translate-y-0.5 transition-all duration-100">
-                <a href="#">Explore</a>
               </button>
+              {/* <button className="bg-[#DE4040] hover:bg-[#CC4242] text-zinc-200 font-pixelify text-2xl py-2 px-4 rounded-xl shadow-md hover:translate-y-0.5 transition-all duration-100">
+                <a href="#">Explore</a>
+              </button> */}
             </div>
           </div>
         </div>

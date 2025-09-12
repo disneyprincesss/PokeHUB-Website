@@ -25,6 +25,29 @@
   transition: filter 500ms;
 }
 
+.img {
+  transition: scale 250ms ease-in;
+}
+
+.card {
+ transition: scale 250ms ease-in;
+}
+
+.cardInfo {
+  transition: 250ms ease-in;
+}
+
+.card:hover .cardInfo {
+  height: 2.5em;
+  transition: height 250ms ease-in;
+}
+
+.card:hover .img {
+  /* height: 12em; */
+  scale: 1.25;
+  transition: scale 250ms ease-in;
+}
+
 .logo:hover {
   filter: drop-shadow(0 0 1.5em rgba(225, 162, 55, 1));
 }
