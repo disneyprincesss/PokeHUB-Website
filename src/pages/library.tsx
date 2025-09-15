@@ -58,7 +58,7 @@ export default function LibraryPage() {
               Pokémon Library
             </h1>
 
-            <div className="relative w-3/8 justify-self-center mx-auto">
+            <div className="relative w-3/8 justify-self-center mx-auto shadow-lg">
               <input
                 type="text"
                 placeholder="Search Pokémon..."

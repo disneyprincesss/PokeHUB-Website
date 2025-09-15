@@ -1,56 +1,22 @@
-@import url("https://fonts.googleapis.com/css2?family=Revalia&display=swap");
-@import url('https://fonts.googleapis.com/css2?family=Jersey+15&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&display=swap');
-@import "tailwindcss";
-
-@theme {
-	--text-shadow-glow: 0 0 10px rgba(225, 162, 55, 1);
-	--text-shadow-dropshadow: 0 10px #2d2c2c;
-}
-
-.font-revalia {
-  font-family: "Revalia", sans-serif;
-}
-
-.font-jersey {
-  font-family: "Jersey 15", sans-serif;
-}
-
-.font-pixelify {
-  font-family: "Pixelify Sans", sans-serif;
-}
-
-.logo{
-  will-change: filter;
-  transition: filter 500ms;
-}
-
-.img, .card {
-  transition: scale 250ms ease-in;
-}
-
-.card:hover .img {
-  scale: 1.25;
-  transition: scale 250ms ease-in;
-}
-
-.logo:hover {
-  filter: drop-shadow(0 0 1.5em rgba(225, 162, 55, 1));
+@font-face {
+  font-family: PixelText;
+  src: url(https://assets.codepen.io/36869/Grand9KPixel.ttf);
 }
 
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: 'PixelText', serif;
+  font-optical-sizing: auto;
   line-height: 1.5;
   font-weight: 400;
 
   color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);background-color: #242424;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #242424;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-
   overflow: hidden;
 
   /* sprite image */
@@ -82,11 +48,11 @@
     height: 100vh;
     width: 100vw;
     overflow: hidden;
-    /* display: flex; */
+    display: flex;
     align-items: center;
     justify-content: center;
     box-sizing: border-box;
-    /* padding: 1rem; */
+    padding: 1rem;
   }
 
   .sprite-wrapper {
@@ -95,6 +61,8 @@
     margin: 0 auto;
   }
 }
+
+
 
 @layer main {
   /* Frame start position */
@@ -169,7 +137,7 @@
         transform-origin: center center;
         background-repeat: no-repeat;
         background-size: calc(1px * var(--sprite-uw)) calc(1px * var(--sprite-uh));
-        z-index: 0;
+        z-index: -1;
 
         /* Frame end position */
         --sprite-fe: calc(var(--sprite-f) * (var(--slides) - 1));
@@ -184,7 +152,6 @@
       }
 
       .carousel {
-        --slides: 4;
         counter-increment: curpage;
         grid-area: scroll;
         overflow-x: auto;

@@ -3,7 +3,7 @@ interface PokemonListItem {
   url: string;
 }
 
-function PokemonCard({ pokemon }: { pokemon: PokemonListItem }) {
+export default function PokemonCard({ pokemon }: { pokemon: PokemonListItem }) {
   return (
     // <div className="max-w-1/4 cursor-pointer overflow-hidden rounded-3xl h-48 card shadow-lg bg-white relative">
     //   <div className="h-full rounded-t-3xl img bg-gray-200 flex items-center justify-center">Image</div>
@@ -23,7 +23,7 @@ function PokemonCard({ pokemon }: { pokemon: PokemonListItem }) {
             .filter(Boolean)
             .pop()}.png`}
           alt={pokemon.name}
-          className="w-25 h-25 img"
+          className="h-25 img"
         />
       </div>
       <div className=" rounded-b-2xl my-2 overflow-hidden">
@@ -34,4 +34,3 @@ function PokemonCard({ pokemon }: { pokemon: PokemonListItem }) {
     </div>
   );
 }
-export default PokemonCard;

@@ -1,8 +1,6 @@
-import Navbar from "../components/navbar";
-import LibraryPage from "./library";
+import { Link } from "react-router-dom";
 
 export default function HomePage() {
-
   return (
     <>
       <main className="relative w-full h-full">
@@ -24,9 +22,9 @@ export default function HomePage() {
             </div> */}
 
           <div className="w-full h-screen flex flex-col items-center justify-center bg-emerald-950/40">
-            <h1 className="font-jersey text-9xl text-shadow-dropshadow w-md text-center">
+            <p className="font-jersey text-9xl text-shadow-dropshadow w-md text-center">
               WELCOME TO
-            </h1>
+            </p>
             <img
               src="/image/nameLogo.png"
               alt="PokeHUB"
@@ -36,15 +34,16 @@ export default function HomePage() {
               All the Pokémon Knowledge in One Place.
             </p>
             <div className="flex gap-8 mt-6">
-              <button className="bg-[#DE4040] hover:bg-[#CC4242] text-zinc-200 font-pixelify text-2xl py-2 px-4 rounded-xl shadow-md hover:translate-y-0.5 transition-all duration-100">
-                <a href="/library">Library</a>
-              </button>
-              <button className="hover:bg-[#CC4242] text-[#DE4040] hover:text-zinc-200 font-pixelify text-2xl py-2 px-4 rounded-xl outline-2 outline-[#CC4242] hover:translate-y-0.5 transition-all duration-100">
-                <a href="#">Battle</a>
-              </button>
-              {/* <button className="bg-[#DE4040] hover:bg-[#CC4242] text-zinc-200 font-pixelify text-2xl py-2 px-4 rounded-xl shadow-md hover:translate-y-0.5 transition-all duration-100">
-                <a href="#">Explore</a>
-              </button> */}
+              <Link to="/library">
+                <button className="bg-[#DE4040] hover:bg-[#CC4242] text-zinc-200 font-pixelify text-2xl py-2 px-4 rounded-xl shadow-md hover:translate-y-0.5 transition-all duration-100">
+                  Library
+                </button>
+              </Link>
+              <Link to="/battle">
+                <button className="hover:bg-[#CC4242] text-[#DE4040] hover:text-zinc-200 font-pixelify text-2xl py-2 px-4 rounded-xl outline-2 outline-[#CC4242] hover:translate-y-0.5 transition-all duration-100">
+                  Battle
+                </button>
+              </Link>
             </div>
           </div>
         </div>
