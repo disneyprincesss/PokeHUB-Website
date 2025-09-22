@@ -5,7 +5,6 @@ import "./index.css";
 import LibraryPage from "./pages/library";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import HomePage from "./pages/home";
-import Book from "./components/book";
 
 const route = createBrowserRouter([
   {
@@ -16,10 +15,10 @@ const route = createBrowserRouter([
     path: "/library",
     element: <LibraryPage />,
   },
-  {
-    path: "/battle",
-    element: <Book />,
-  }
+  // {
+  //   path: "/battle",
+  //   element: <Book />,
+  // }
 ]);
 
 createRoot(document.getElementById("root")!).render(

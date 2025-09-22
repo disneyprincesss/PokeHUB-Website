@@ -1,11 +1,11 @@
 @import url("https://fonts.googleapis.com/css2?family=Revalia&display=swap");
-@import url('https://fonts.googleapis.com/css2?family=Jersey+15&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Jersey+15&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&display=swap");
 @import "tailwindcss";
 
 @theme {
-	--text-shadow-glow: 0 0 10px rgba(225, 162, 55, 1);
-	--text-shadow-dropshadow: 0 10px #2d2c2c;
+  --text-shadow-glow: 0 0 10px rgba(225, 162, 55, 1);
+  --text-shadow-dropshadow: 0 10px #2d2c2c;
 }
 
 .font-revalia {
@@ -20,18 +20,24 @@
   font-family: "Pixelify Sans", sans-serif;
 }
 
-.logo{
+.logo {
   will-change: filter;
   transition: filter 500ms;
 }
 
-.img, .card {
+.img,
+.card {
   transition: scale 250ms ease-in;
 }
 
 .card:hover .img {
   scale: 1.25;
   transition: scale 250ms ease-in;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  transition: transform 250ms ease-in;  
 }
 
 .logo:hover {
@@ -44,7 +50,8 @@
   font-weight: 400;
 
   color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);background-color: #242424;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #242424;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -58,7 +65,7 @@
 
   /* sprite animation settings */
   /* animation duration */
-  --sprite-as: .8s;
+  --sprite-as: 0.8s;
   /* animation direction */
   --sprite-ad: normal;
   /* animation fill mode */
@@ -112,14 +119,15 @@
   .container {
     display: flex;
     flex-direction: column;
-    gap: 3rem;
+    gap: 1rem;
+    --slides: 13;
 
     /* sprite columns */
     --sprite-c: 5;
     /* sprite image height */
-    --sprite-h: 3000;
+    --sprite-h: 3500;
     /* sprite image width */
-    --sprite-w: 9600;
+    --sprite-w: 12000;
     /* sprite frames */
     --sprite-f: 7;
     /* animation duration based on frame rate */
@@ -155,7 +163,8 @@
       grid-template-areas:
             "scroll scroll scroll"
             "left markers right";
-      gap: 1rem;
+       gap: 0.5rem;
+      justify-items: center;
 
       .sprite {
         position: absolute;
@@ -180,11 +189,12 @@
 
         background-position: calc(-1px * var(--col)) calc(-1px * var(--row));
         animation: frame var(--sprite-as) var(--sprite-at) 0s var(--sprite-ad) var(--sprite-af) var(--sprite-ap);
+        /* animation: frame 1s steps(var(--sprite-fe)) both; */
         animation-timeline: --carousel-timeline;
+        /* animation-range: 0% 100%; */
       }
 
       .carousel {
-        --slides: 4;
         counter-increment: curpage;
         grid-area: scroll;
         overflow-x: auto;
@@ -208,15 +218,16 @@
           border: 0;
           background-color: transparent;
           cursor: pointer;
+          z-index: 1;
         }
 
         &::scroll-button(*):disabled{
           filter: invert(1);
           opacity: 0.5;
         }
-        &::scroll-button(*):not(:disabled):is(:hover, :active) {
+        /* &::scroll-button(*):not(:disabled):is(:hover, :active) {
           filter: drop-shadow(2px 4px 6px black);
-        }
+        } */
 
         &::scroll-button(*):not(:disabled):active {
           scale: 90%;
@@ -286,7 +297,8 @@
 
           .page-container {
             display: flex;
-            gap: 3rem;
+            flex-direction: row;
+            gap: 0.15 rem;
             height: 100%;
 
             animation: stay-centered linear both;
@@ -295,11 +307,8 @@
           }
 
           .left-page, .right-page {
-            flex: 1;
-            font-size: small;
-            overflow: hidden;
-            display: grid;
-            grid-template-rows: 1fr auto;
+            width: 50%;
+            height: 100%;
 
             &:after {
               bottom: 15px;
@@ -307,10 +316,6 @@
             }
 
             > div {
-              text-align: justify;
-              hyphens: auto;
-              line-height: normal;
-              display: block;
               word-wrap: break-word;
             }
           }
