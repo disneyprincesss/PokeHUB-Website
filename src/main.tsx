@@ -1,10 +1,10 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
-// import HomePage from './pages/home'
 import LibraryPage from "./pages/library";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import HomePage from "./pages/home";
+import BattlePage from "./pages/battle";
 
 const route = createBrowserRouter([
   {
@@ -15,10 +15,10 @@ const route = createBrowserRouter([
     path: "/library",
     element: <LibraryPage />,
   },
-  // {
-  //   path: "/battle",
-  //   element: <Book />,
-  // }
+  {
+    path: "/battle",
+    element: <BattlePage />,
+  },
 ]);
 
 createRoot(document.getElementById("root")!).render(

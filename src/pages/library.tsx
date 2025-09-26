@@ -1,22 +1,24 @@
-import BookPage from "../components/book-page";
-import PokemonCard from "../components/card";
 import Navbar from "../components/navbar";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import NewBook from "../components/new-book";
+import PokemonCard from "../components/card";
 
 interface PokemonListItem {
   name: string;
   url: string;
 }
 
-export default function LibraryPage() {
-  const ITEMS_PER_PAGE = 12;
+interface PageData {
+  right: PokemonListItem[];
+  left: PokemonListItem[];
+}
 
+export default function LibraryPage() {
   const [pokemonList, setPokemonList] = useState<PokemonListItem[]>([]);
   const [filteredList, setFilteredList] = useState<PokemonListItem[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>("");
 
   const [loading, setLoading] = useState<boolean>(false);
-  const [currentPage, setCurrentPage] = useState<number>(1);
 
   useEffect(() => {
     setLoading(true);
@@ -38,48 +40,42 @@ export default function LibraryPage() {
           p.name.toLowerCase().includes(searchTerm.toLowerCase())
         )
       );
-    }
-    setCurrentPage(1); // reset to first page on search
+    } // reset to first page on search
   }, [searchTerm, pokemonList]);
 
-  const totalPages = Math.ceil(filteredList.length / ITEMS_PER_PAGE);
-  // const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  // const currentItems = filteredList.slice(
-  //   startIndex,
-  //   startIndex + ITEMS_PER_PAGE
-  // );
-  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const currentItems = filteredList.slice(
-    startIndex,
-    startIndex + ITEMS_PER_PAGE
-  );
+  const [currentPage, setCurrentPage] = useState(1);
 
-  const carouselRef = useRef<HTMLDivElement>(null);
+  // Build { right, left } pairs
+  const pages: PageData[] = useMemo(() => {
+    const spreads: PageData[] = [];
 
-  const scrollNext = () => {
-    if (carouselRef.current) {
-      carouselRef.current.scrollBy({
-        left: carouselRef.current.clientWidth, // move 1 page width
-        behavior: "smooth",
+    // Each spread = 6 pokémon on the right, 6 pokémon on the left
+    for (let i = 0; i < filteredList.length; i += 12) {
+      spreads.push({
+        left: filteredList.slice(i, i + 6),
+        right: filteredList.slice(i + 6, i + 12),
       });
     }
+
+    return spreads;
+  }, [filteredList]);
+
+  const totalPages = pages.length;
+
+  const prevPage = () => {
+    if (currentPage > 1) setCurrentPage((p) => p - 1);
   };
 
-  const scrollPrev = () => {
-    if (carouselRef.current) {
-      carouselRef.current.scrollBy({
-        left: -carouselRef.current.clientWidth, // move back 1 page width
-        behavior: "smooth",
-      });
-    }
+  const nextPage = () => {
+    if (currentPage < totalPages) setCurrentPage((p) => p + 1);
   };
 
   return (
     <>
       <main className="relative w-full">
         <Navbar />
-        <div className="bg-[url('/image/library-bg.gif')] h-screen bg-cover bg-center flex justify-center items-center overflow-auto">
-          <div className="w-4xl text-center mt-35 flex flex-col gap-6 justify-center items-center">
+        <div className="bg-[url('/image/library-bg.gif')] h-screen bg-cover bg-center flex flex-col justify-center items-center overflow-auto">
+          <div className="w-4xl text-center flex flex-col gap-6 justify-center items-center mt-18">
             <h1 className="text-3xl font-revalia text-amber-600 text-shadow-glow">
               Pokémon Library
             </h1>
@@ -103,37 +99,97 @@ export default function LibraryPage() {
             </div>
 
             {loading && <p>Loading Pokémons…</p>}
+          </div>
+          <div className="h-full flex justify-center items-center">
+            {/* Prev Button */}
+            <div className="mx-4">
+              <button
+                className="bg-[#bb4d00] hover:bg-[#914007] text-zinc-200 font-pixelify text-xl py-2 px-4 rounded-xl shadow-md transition-all duration-100"
+                disabled={currentPage === 1}
+                onClick={prevPage}
+              >
+                ◀
+              </button>
+            </div>
+            <div className="bg-[url('/image/book.png')] bg-cover bg-center w-215 h-145">
+              <div className="w-120 h-143 flex justify-center items-center relative translate-x-107">
+                {pages.map((pageData, index) => {
+                  const pageNumber = index + 1;
 
-            {/* <button
-                    className="bg-[#bb4d00] hover:bg-[#914007] text-zinc-200 font-pixelify text-xl py-2 px-4 rounded-xl shadow-md absolute left-7 top-1/3 hover:translate-y-0.5 transition-all duration-100"
-                    disabled={currentPage === 1}
-                    onClick={() => setCurrentPage((p) => p - 1)}
-                    onClickCapture={() => prevPage()}
-                  >
-                    ◀
-                  </button>
+                  const isFlipped =
+                    pageNumber <= pages.length
+                      ? currentPage >= pageNumber
+                      : false;
 
-                  <button
-                    className="bg-[#bb4d00] hover:bg-[#914007] text-zinc-200 font-pixelify text-xl py-2 px-4 rounded-xl shadow-md absolute right-7 top-1/3 hover:translate-y-0.5 transition-all duration-100"
-                    disabled={currentPage === totalPages}
-                    onClick={() => setCurrentPage((p) => p + 1)}
-                    onClickCapture={() => nextPage()}
-                  >
-                    ▶
-                  </button> */}
+                  let z;
+                  if (pageNumber === currentPage) {
+                    z = totalPages;
+                  } else if (pageNumber < currentPage) {
+                    z = pageNumber;
+                  } else {
+                    z = totalPages - (pageNumber - currentPage);
+                  }
 
-            <div className="container w-full mt-5">
-              <div className="sprite-wrapper">
-                <div className="book">
-                  <div className="carousel" ref={carouselRef}>
-                    <div className="sprite"></div>
-                    <BookPage
-                      filteredList={filteredList}
-                      ITEMS_PER_PAGE={ITEMS_PER_PAGE}
-                    />
-                  </div>
-                </div>
+                  console.log(pages);
+                  return (
+                    <div
+                      key={pageNumber}
+                      className={`pages absolute left-0 top-0 w-full h-full transition-transform duration-1000 ${
+                        isFlipped ? "flip" : ""
+                      }`}
+                      style={{ zIndex: z }}
+                    >
+                      <div className="page-left w-100 h-full absolute left-0 top-0 text-zinc-900 bg-[#f9e5b7] border-l-7 border-[#e7d7a2] rounded-2xl">
+                        <div
+                          className={`left-content w-full h-full flex flex-wrap justify-center items-center ${
+                            currentPage === pageNumber || totalPages < 13
+                              ? "opacity-100 translate-x-0"
+                              : "opacity-50 -translate-x-5"
+                          } transition-all duration-800`}
+                        >
+                          {pageData.left.map((pokemon) => (
+                            <button
+                              key={pokemon.name}
+                              onClick={() => alert(pokemon.name)}
+                            >
+                              <PokemonCard pokemon={pokemon} />
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="page-right w-100 h-full absolute left-0 top-0 text-zinc-900 bg-[#f9e5b7] rounded-2xl">
+                        <div
+                          className={` w-full h-full flex flex-wrap justify-center items-center ${
+                            currentPage === pageNumber || totalPages < 13
+                              ? "opacity-100 translate-x-0"
+                              : "opacity-50 translate-x-5"
+                          } transition-all duration-800`}
+                        >
+                          {pageData.right.map((pokemon) => (
+                            <button
+                              key={pokemon.name}
+                              onClick={() => alert(pokemon.name)}
+                            >
+                              <PokemonCard pokemon={pokemon} />
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
+            </div>
+            {/* Next Button */}
+            <div className="mx-4">
+              <button
+                className="bg-[#bb4d00] hover:bg-[#914007] text-zinc-200 font-pixelify text-xl py-2 px-4 rounded-xl shadow-md"
+                disabled={currentPage === totalPages}
+                onClick={nextPage}
+              >
+                ▶
+              </button>
             </div>
           </div>
         </div>
