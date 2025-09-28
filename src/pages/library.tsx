@@ -1,7 +1,8 @@
 import Navbar from "../components/navbar";
 import { useEffect, useMemo, useState } from "react";
-import NewBook from "../components/new-book";
 import PokemonCard from "../components/card";
+import PokemonInfo from "../components/pokemon-info";
+import { Search } from "lucide-react";
 
 interface PokemonListItem {
   name: string;
@@ -13,12 +14,29 @@ interface PageData {
   left: PokemonListItem[];
 }
 
+interface PokemonDetails {
+  id: number;
+  name: string;
+  height: number;
+  weight: number;
+  types: { slot: number; type: { name: string } }[];
+  stats: { base_stat: number; stat: { name: string } }[];
+  abilities: { is_hidden: boolean; ability: { name: string } }[];
+  description?: string;
+  image?: string;
+  chain: { species: { name: string }; evolves_to: any[] }[];
+}
+
 export default function LibraryPage() {
   const [pokemonList, setPokemonList] = useState<PokemonListItem[]>([]);
   const [filteredList, setFilteredList] = useState<PokemonListItem[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>("");
 
   const [loading, setLoading] = useState<boolean>(false);
+  const [isCardOpen, setIsCardOpen] = useState<boolean>(false);
+  const [selectedPokemon, setSelectedPokemon] = useState<PokemonDetails | null>(
+    null
+  );
 
   useEffect(() => {
     setLoading(true);
@@ -42,6 +60,41 @@ export default function LibraryPage() {
       );
     } // reset to first page on search
   }, [searchTerm, pokemonList]);
+
+  const fetchPokemonDetails = async (url: string) => {
+    const res = await fetch(url);
+    const data = await res.json();
+
+    const speciesRes = await fetch(data.species.url);
+    const speciesData = await speciesRes.json();
+    const flavorText =
+      speciesData.flavor_text_entries
+        .find((e: any) => e.language.name === "en")
+        ?.flavor_text?.replace(/\f|\n|\r/g, " ") || "No description available.";
+
+    const image =
+      data.sprites.other["official-artwork"].front_default || // clean official art
+      data.sprites.other["dream_world"].front_default || // SVG fallback
+      data.sprites.other["home"].front_default || // 3D model
+      data.sprites.front_default;
+    
+    let evolutionChainNames: string[] = [];
+    if (speciesData.evolution_chain?.url) {
+      const evolutionRes = await fetch(speciesData.evolution_chain.url);
+      const evolutionData = await evolutionRes.json();
+
+      function walk(chain: any, acc: string[]) {
+        acc.push(chain.species.name);
+        if (chain.evolves_to && chain.evolves_to.length) {
+          chain.evolves_to.forEach((c: any) => walk(c, acc));
+        }
+        return acc;
+      }
+      evolutionChainNames = walk(evolutionData.chain, []);
+    }
+
+    setSelectedPokemon({ ...data, description: flavorText, image, evolutionChain: evolutionChainNames });
+  };
 
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -90,16 +143,14 @@ export default function LibraryPage() {
               />
 
               <button className="h-8 absolute right-0 bg-amber-700 text-white px-3 py-1 rounded-r-lg hover:bg-[#914007] transition-colors">
-                <img
-                  src="/image/search-icon.png"
-                  alt="Search"
-                  className="w-6"
-                />
+                <Search />
               </button>
             </div>
 
             {loading && <p>Loading Pokémons…</p>}
           </div>
+
+          {/* Book */}
           <div className="h-full flex justify-center items-center">
             {/* Prev Button */}
             <div className="mx-4">
@@ -130,7 +181,6 @@ export default function LibraryPage() {
                     z = totalPages - (pageNumber - currentPage);
                   }
 
-                  console.log(pages);
                   return (
                     <div
                       key={pageNumber}
@@ -150,7 +200,10 @@ export default function LibraryPage() {
                           {pageData.left.map((pokemon) => (
                             <button
                               key={pokemon.name}
-                              onClick={() => alert(pokemon.name)}
+                              onClick={() => {
+                                setIsCardOpen(true);
+                                fetchPokemonDetails(pokemon.url);
+                              }}
                             >
                               <PokemonCard pokemon={pokemon} />
                             </button>
@@ -163,13 +216,16 @@ export default function LibraryPage() {
                           className={` w-full h-full flex flex-wrap justify-center items-center ${
                             currentPage === pageNumber || totalPages < 13
                               ? "opacity-100 translate-x-0"
-                              : "opacity-50 translate-x-5"
+                              : "opacity-50 -translate-x-5"
                           } transition-all duration-800`}
                         >
                           {pageData.right.map((pokemon) => (
                             <button
                               key={pokemon.name}
-                              onClick={() => alert(pokemon.name)}
+                              onClick={() => {
+                                setIsCardOpen(true);
+                                fetchPokemonDetails(pokemon.url);
+                              }}
                             >
                               <PokemonCard pokemon={pokemon} />
                             </button>
@@ -191,6 +247,21 @@ export default function LibraryPage() {
                 ▶
               </button>
             </div>
+          </div>
+
+          {/* Pokémon Info Overlay */}
+          <div
+            className={`bg-zinc-900/50 w-full h-full absolute z-10 ${
+              isCardOpen ? "block" : "hidden"
+            }`}
+          >
+            {selectedPokemon && (
+              <PokemonInfo
+                pokemon={selectedPokemon}
+                setIsCardOpen={setIsCardOpen}
+                setSelectedPokemon={setSelectedPokemon}
+              />
+            )}
           </div>
         </div>
       </main>

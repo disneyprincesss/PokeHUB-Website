@@ -22,9 +22,9 @@ export default function HomePage() {
             </div> */}
 
           <div className="w-full h-screen flex flex-col items-center justify-center bg-emerald-950/40">
-            <p className="font-jersey text-9xl text-shadow-dropshadow w-md text-center">
+            <h1 className="font-jersey text-9xl text-shadow-dropshadow w-md text-center">
               WELCOME TO
-            </p>
+            </h1>
             <img
               src="/image/nameLogo.png"
               alt="PokeHUB"
