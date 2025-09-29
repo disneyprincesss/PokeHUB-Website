@@ -14,6 +14,13 @@ interface PageData {
   left: PokemonListItem[];
 }
 
+interface EvolutionPokemon {
+  id: number;
+  name: string;
+  image: string;
+  types: { slot: number; type: { name: string } }[];
+}
+
 interface PokemonDetails {
   id: number;
   name: string;
@@ -24,7 +31,7 @@ interface PokemonDetails {
   abilities: { is_hidden: boolean; ability: { name: string } }[];
   description?: string;
   image?: string;
-  chain: { species: { name: string }; evolves_to: any[] }[];
+  evolutionChain?: EvolutionPokemon[];
 }
 
 export default function LibraryPage() {
@@ -40,7 +47,7 @@ export default function LibraryPage() {
 
   useEffect(() => {
     setLoading(true);
-    fetch("https://pokeapi.co/api/v2/pokemon?limit=151") // fetch first-gen
+    fetch("https://pokeapi.co/api/v2/pokemon?limit=650") // fetch first-gen
       .then((res) => res.json())
       .then((data) => {
         setPokemonList(data.results);
@@ -77,23 +84,61 @@ export default function LibraryPage() {
       data.sprites.other["dream_world"].front_default || // SVG fallback
       data.sprites.other["home"].front_default || // 3D model
       data.sprites.front_default;
-    
-    let evolutionChainNames: string[] = [];
+
+    let evolutionChain: EvolutionPokemon[] = [];
     if (speciesData.evolution_chain?.url) {
       const evolutionRes = await fetch(speciesData.evolution_chain.url);
       const evolutionData = await evolutionRes.json();
 
-      function walk(chain: any, acc: string[]) {
+      // Get all Pokemon names in the evolution chain
+      function getEvolutionNames(chain: any, acc: string[]): string[] {
         acc.push(chain.species.name);
         if (chain.evolves_to && chain.evolves_to.length) {
-          chain.evolves_to.forEach((c: any) => walk(c, acc));
+          chain.evolves_to.forEach((c: any) => getEvolutionNames(c, acc));
         }
         return acc;
       }
-      evolutionChainNames = walk(evolutionData.chain, []);
+
+      const evolutionNames = getEvolutionNames(evolutionData.chain, []);
+
+      // Fetch detailed data for each Pokemon in the evolution chain
+      const evolutionPromises = evolutionNames.map(async (name: string) => {
+        try {
+          const pokemonRes = await fetch(
+            `https://pokeapi.co/api/v2/pokemon/${name}`
+          );
+          const pokemonData = await pokemonRes.json();
+
+          const evolutionImage =
+            pokemonData.sprites.other["official-artwork"].front_default ||
+            pokemonData.sprites.other["dream_world"].front_default ||
+            pokemonData.sprites.other["home"].front_default ||
+            pokemonData.sprites.front_default;
+
+          return {
+            id: pokemonData.id,
+            name: pokemonData.name,
+            image: evolutionImage,
+            types: pokemonData.types,
+          };
+        } catch (error) {
+          console.error(`Failed to fetch evolution data for ${name}:`, error);
+          return null;
+        }
+      });
+
+      const evolutionResults = await Promise.all(evolutionPromises);
+      evolutionChain = evolutionResults.filter(Boolean) as EvolutionPokemon[];
     }
 
-    setSelectedPokemon({ ...data, description: flavorText, image, evolutionChain: evolutionChainNames });
+    console.log("Evolution Chain:", evolutionChain);
+
+    setSelectedPokemon({
+      ...data,
+      description: flavorText,
+      image,
+      evolutionChain,
+    });
   };
 
   const [currentPage, setCurrentPage] = useState(1);

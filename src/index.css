@@ -10,6 +10,7 @@
 @theme {
   --text-shadow-glow: 0 0 10px rgba(225, 162, 55, 1);
   --text-shadow-dropshadow: 0 10px #2d2c2c;
+  --text-shadow-card: 8px 8px 10px rgba(0, 0, 0, 0.5);
 }
 
 :root {
