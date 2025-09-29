@@ -7,6 +7,7 @@ import { Search } from "lucide-react";
 interface PokemonListItem {
   name: string;
   url: string;
+  types?: string[];
 }
 
 interface PageData {
@@ -38,6 +39,32 @@ export default function LibraryPage() {
   const [pokemonList, setPokemonList] = useState<PokemonListItem[]>([]);
   const [filteredList, setFilteredList] = useState<PokemonListItem[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>("");
+  const [selectedType, setSelectedType] = useState<string>("");
+  const [pokemonWithTypes, setPokemonWithTypes] = useState<PokemonListItem[]>(
+    []
+  );
+
+  // All Pokemon types
+  const pokemonTypes = [
+    "normal",
+    "fire",
+    "water",
+    "electric",
+    "grass",
+    "ice",
+    "fighting",
+    "poison",
+    "ground",
+    "flying",
+    "psychic",
+    "bug",
+    "rock",
+    "ghost",
+    "dragon",
+    "dark",
+    "steel",
+    "fairy",
+  ];
 
   const [loading, setLoading] = useState<boolean>(false);
   const [isCardOpen, setIsCardOpen] = useState<boolean>(false);
@@ -47,26 +74,58 @@ export default function LibraryPage() {
 
   useEffect(() => {
     setLoading(true);
-    fetch("https://pokeapi.co/api/v2/pokemon?limit=650") // fetch first-gen
+    fetch("https://pokeapi.co/api/v2/pokemon?limit=650")
       .then((res) => res.json())
-      .then((data) => {
+      .then(async (data) => {
         setPokemonList(data.results);
         setFilteredList(data.results);
+        
+        const pokemonWithTypesPromises = data.results
+          .slice(0, 150)
+          .map(async (pokemon: PokemonListItem) => {
+            try {
+              const response = await fetch(pokemon.url);
+              const pokemonData = await response.json();
+              return {
+                ...pokemon,
+                types: pokemonData.types.map((type: any) => type.type.name),
+              };
+            } catch (error) {
+              console.error(
+                `Failed to fetch types for ${pokemon.name}:`,
+                error
+              );
+              return { ...pokemon, types: [] };
+            }
+          });
+
+        const pokemonWithTypesData = await Promise.all(
+          pokemonWithTypesPromises
+        );
+        setPokemonWithTypes(pokemonWithTypesData);
+        console.log("Pokemon with types loaded:", pokemonWithTypesData.length);
       })
       .finally(() => setLoading(false));
   }, []);
 
   useEffect(() => {
-    if (searchTerm.trim() === "") {
-      setFilteredList(pokemonList);
-    } else {
-      setFilteredList(
-        pokemonList.filter((p) =>
-          p.name.toLowerCase().includes(searchTerm.toLowerCase())
-        )
+    let filtered = pokemonWithTypes.length > 0 ? pokemonWithTypes : pokemonList;
+
+    // Apply name search filter
+    if (searchTerm.trim() !== "") {
+      filtered = filtered.filter((p) =>
+        p.name.toLowerCase().includes(searchTerm.toLowerCase())
       );
-    } // reset to first page on search
-  }, [searchTerm, pokemonList]);
+    }
+
+    // Apply type filter
+    if (selectedType !== "") {
+      filtered = filtered.filter((p) => p.types?.includes(selectedType));
+    }
+
+    setFilteredList(filtered);
+    setCurrentPage(1); // Reset to first page when filters change
+  }, [searchTerm, selectedType, pokemonList, pokemonWithTypes]);
 
   const fetchPokemonDetails = async (url: string) => {
     const res = await fetch(url);
@@ -131,8 +190,6 @@ export default function LibraryPage() {
       evolutionChain = evolutionResults.filter(Boolean) as EvolutionPokemon[];
     }
 
-    console.log("Evolution Chain:", evolutionChain);
-
     setSelectedPokemon({
       ...data,
       description: flavorText,
@@ -172,24 +229,42 @@ export default function LibraryPage() {
     <>
       <main className="relative w-full">
         <Navbar />
-        <div className="bg-[url('/image/library-bg.gif')] h-screen bg-cover bg-center flex flex-col justify-center items-center overflow-auto">
+        <div className="bg-[url('/image/library-bg.gif')] h-screen bg-cover bg-center flex flex-col justify-center items-center overflow-hidden">
           <div className="w-4xl text-center flex flex-col gap-6 justify-center items-center mt-18">
             <h1 className="text-3xl font-revalia text-amber-600 text-shadow-glow">
               Pokémon Library
             </h1>
 
-            <div className="relative w-3/8 justify-self-center mx-auto shadow-lg bg-[#f1e2b2] rounded-lg z-1">
-              <input
-                type="text"
-                placeholder="Search Pokémon..."
-                className="w-full h-8 p-1.5 rounded-lg text-black outline-3 outline-amber-700 font-jersey text-2xl"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
+            <div className="flex gap-4 w-4xl max-w-xl items-center">
+              {/* Search Bar */}
+              <div className="relative w-full mx-auto bg-[#f1e2b2] rounded-lg z-1">
+                <input
+                  type="text"
+                  placeholder="Search Pokémon..."
+                  className="w-full h-8 p-1.5 rounded-lg text-black outline-3 outline-amber-700 font-jersey text-2xl"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+                <button className="h-8 absolute right-0 bg-amber-700 text-white px-3 py-1 rounded-r-lg hover:bg-[#914007] transition-colors">
+                  <Search />
+                </button>
+              </div>
 
-              <button className="h-8 absolute right-0 bg-amber-700 text-white px-3 py-1 rounded-r-lg hover:bg-[#914007] transition-colors">
-                <Search />
-              </button>
+              {/* Type Filter Dropdown */}
+              <div className="flex justify-center">
+                <select
+                  value={selectedType}
+                  onChange={(e) => setSelectedType(e.target.value)}
+                  className="bg-[#f1e2b2] text-amber-800 font-jersey text-xl px-4 py-2 rounded-lg shadow-lg outline-none border-2 border-amber-700 hover:bg-amber-200 transition-colors cursor-pointer"
+                >
+                  <option value="">All Types</option>
+                  {pokemonTypes.map((type) => (
+                    <option key={type} value={type} className="capitalize">
+                      {type.charAt(0).toUpperCase() + type.slice(1)}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
 
             {loading && <p>Loading Pokémons…</p>}

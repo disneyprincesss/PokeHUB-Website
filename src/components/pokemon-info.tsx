@@ -3,6 +3,7 @@ import { Card } from "./ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 import { Progress } from "./ui/progress";
+import { ScrollArea } from "./ui/scroll-area";
 
 interface EvolutionPokemon {
   id: number;
@@ -319,40 +320,42 @@ export default function PokemonInfo({
           <TabsContent value="evolution">
             <div>
               <h3>Evolution Chain</h3>
-              <div className="flex items-center gap-4 flex-wrap">
-                {pokemon?.evolutionChain &&
-                pokemon.evolutionChain.length > 1 ? (
-                  pokemon.evolutionChain.map((evolution, index) => (
-                    <div key={evolution.id} className="flex items-center">
-                      <div className="bg-white/20 rounded-lg p-2 flex flex-col items-center min-w-24">
-                        <img
-                          src={evolution.image}
-                          alt={evolution.name}
-                          className="w-16 h-16 object-contain"
-                        />
-                        <span className="text-sm capitalize font-semibold">
-                          {evolution.name}
-                        </span>
-                        <div className="flex gap-1 mt-1">
-                          {evolution.types.map((type) => (
-                            <img
-                              key={type.slot}
-                              src={`/image/pokemon-type/${type.type.name}.png`}
-                              alt={type.type.name}
-                              className="w-4 h-4"
-                            />
-                          ))}
+              <ScrollArea className="h-98 w-full">
+                <div className="flex items-center gap-4 flex-wrap">
+                  {pokemon?.evolutionChain &&
+                  pokemon.evolutionChain.length > 1 ? (
+                    pokemon.evolutionChain.map((evolution, index) => (
+                      <div key={evolution.id} className="flex items-center">
+                        <div className="bg-white/20 rounded-lg p-2 flex flex-col items-center min-w-30 h-47">
+                          <img
+                            src={evolution.image}
+                            alt={evolution.name}
+                            className="w-28 h-28 object-contain"
+                          />
+                          <span className="text-lg capitalize font-semibold">
+                            {evolution.name}
+                          </span>
+                          <div className="flex gap-1">
+                            {evolution.types.map((type) => (
+                              <img
+                                key={type.slot}
+                                src={`/image/pokemon-type/${type.type.name}.png`}
+                                alt={type.type.name}
+                                className="w-7 h-7"
+                              />
+                            ))}
+                          </div>
                         </div>
+                        {index < (pokemon.evolutionChain?.length || 0) - 1 && (
+                          <span className="mx-2 text-2xl">→</span>
+                        )}
                       </div>
-                      {index < (pokemon.evolutionChain?.length || 0) - 1 && (
-                        <span className="mx-2 text-2xl">→</span>
-                      )}
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-lg">This Pokémon does not evolve.</p>
-                )}
-              </div>
+                    ))
+                  ) : (
+                    <p className="text-lg">This Pokémon does not evolve.</p>
+                  )}
+                </div>
+              </ScrollArea>
             </div>
           </TabsContent>
         </Tabs>
