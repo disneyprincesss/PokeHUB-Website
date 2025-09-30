@@ -2,7 +2,6 @@ import Navbar from "../components/navbar";
 import { useEffect, useMemo, useState } from "react";
 import PokemonCard from "../components/card";
 import PokemonInfo from "../components/pokemon-info";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Search } from "lucide-react";
 
 interface PokemonListItem {
