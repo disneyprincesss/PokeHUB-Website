@@ -78,14 +78,14 @@ export default function PokemonInfo({
           : selectedPokemonType == "normal"
           ? "from-[#A8A878] to-[#E0E0B0]"
           : ""
-      } to-62% w-[95vw] max-w-6xl h-[90vh] max-h-170 absolute top-0 bottom-0 my-auto left-0 right-0 mx-auto flex flex-col lg:flex-row`}
+      } to-62% w-[95vw] max-w-6xl h-[100vh] max-h-190 lg:h-[90vh] lg:max-h-170 absolute top-0 bottom-0 my-auto left-0 right-0 mx-auto flex flex-col lg:flex-row`}
     >
       <div className="relative w-full">
         {selectedPokemonType != "normal" && (
           <img
             src={`/image/card-bg/${selectedPokemonType}-bg.png`}
             alt={`${selectedPokemonType} type`}
-            className={`opacity-50 absolute top-0 left-0 right-0 mx-auto sm:h-55 lg:   ${
+            className={`opacity-50 absolute h-50 left-0 right-20 mx-auto lg:right-0 lg:mx-0 sm:h-55 ${
               selectedPokemonType == "grass"
                 ? "lg:bottom-15 lg:-left-10 lg:h-135"
                 : selectedPokemonType == "fire"
@@ -95,9 +95,9 @@ export default function PokemonInfo({
                 : selectedPokemonType == "bug"
                 ? "lg:bottom-15 lg:-left-3 lg:h-130"
                 : selectedPokemonType == "electric"
-                ? "lg:bottom-30 lg:left-0 lg:h-140"
+                ? "lg:bottom-25 lg:left-0 lg:h-140"
                 : selectedPokemonType == "ground"
-                ? "lg:top-20 lg:left-0 lg:w-250 lg:h-auto"
+                ? "lg:top-20 lg:left-0 lg:w-250 h-auto"
                 : selectedPokemonType == "poison"
                 ? "lg:top-0 lg:-left-5 lg:h-110"
                 : selectedPokemonType == "fighting"
@@ -127,19 +127,19 @@ export default function PokemonInfo({
         <img
           src={`${pokemon?.image ? pokemon.image : ""}`}
           alt={pokemon?.name}
-          className={`z-10 mx-auto absolute h-32 sm:h-40 lg:h-100 ${
+          className={`z-10 mx-auto absolute right-0 h-40 sm:h-45 lg:h-100 ${
             selectedPokemonType == "normal"
-              ? "lg:top-0 lg:bottom-0 lg:my-auto lg:left-0 lg:right-0 lg:mx-auto"
-              : "lg:bottom-0 lg:right-0"
+              ? "lg:top-0 lg:bottom-0 lg:my-auto left-0 lg:right-0 "
+              : "left-10 sm:left-25 top-12 lg:top-55 lg:left-40"
           } `}
         />
       </div>
       <div
-        className={`w-full px-0 ${
+        className={`w-full pb-5 lg:pb-0 flex flex-col justify-center items-center lg:items-start lg:justify-start px-0 absolute bottom-0 lg:static ${
           selectedPokemonType == "dark" ? "text-zinc-200" : "text-zinc-800"
-        }`}
+        } `}
       >
-        <h1 className="text-3xl sm:text-4xl lg:text-8xl font-jersey font-bold uppercase tracking-wider text-shadow-card text-center lg:text-left">
+        <h1 className="text-5xl sm:text-7xl lg:text-8xl font-jersey font-bold uppercase tracking-wider text-shadow-card text-center lg:text-left z-10">
           {pokemon?.name}
         </h1>
 
@@ -160,7 +160,7 @@ export default function PokemonInfo({
                         key={t.slot}
                         src={`/image/pokemon-type/${t.type.name}.png`}
                         alt={`${t.type.name} type`}
-                        className="h-10 mr-1"
+                        className="h-9 sm:h-10 mr-1"
                       />
                     </TooltipTrigger>
                     <TooltipContent>{t.type.name}</TooltipContent>
@@ -257,7 +257,7 @@ export default function PokemonInfo({
                     <Tooltip>
                       <TooltipTrigger>
                         <span
-                          className={`text-2xl px-2 py-1 mr-2 rounded-lg shadow-md text-white ${abilityColor}`}
+                          className={` text-xl sm:text-2xl px-2 py-1 mr-2 rounded-lg shadow-md text-white ${abilityColor}`}
                         >
                           {abilityName}
                         </span>
@@ -291,10 +291,10 @@ export default function PokemonInfo({
               <p className="text-xl">{pokemon?.description}</p>
             </div>
           </TabsContent>
-          <TabsContent value="stats">
+          <TabsContent value="stats" className="justify-center items-center">
             <div className="stats">
               <h3>Stats</h3>
-              <ul className="flex flex-col gap-4 text-2xl w-125 mt-3">
+              <ul className="flex flex-col gap-4 w-100 text-xl sm:text-2xl sm:w-125 mt-3">
                 {pokemon?.stats.map((s) => {
                   let statName = s.stat.name
                     .split("-")
@@ -320,7 +320,7 @@ export default function PokemonInfo({
           <TabsContent value="evolution">
             <div>
               <h3>Evolution Chain</h3>
-              <ScrollArea className="h-98 w-full">
+              <ScrollArea className="h-80 lg:h-98 w-full">
                 <div className="flex items-center gap-4 flex-wrap">
                   {pokemon?.evolutionChain &&
                   pokemon.evolutionChain.length > 1 ? (

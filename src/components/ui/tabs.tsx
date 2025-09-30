@@ -10,7 +10,7 @@ function Tabs({
   return (
     <TabsPrimitive.Root
       data-slot="tabs"
-      className={cn("flex flex-col gap-2 mt-8 w-135", className)}
+      className={cn("flex flex-col gap-2 mt-2 lg:mt-8 w-110 sm:w-138", className)}
       {...props}
     />
   )
@@ -55,7 +55,7 @@ function TabsContent({
   return (
     <TabsPrimitive.Content
       data-slot="tabs-content"
-      className={cn("flex flex-col gap-3 outline-none mt-3 font-robotoslab", className)}
+      className={cn("flex flex-col gap-1 sm:gap-3 outline-none mt-3 font-robotoslab pr-2", className)}
       {...props}
     />
   )
