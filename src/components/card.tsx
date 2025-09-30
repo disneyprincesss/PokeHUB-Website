@@ -52,19 +52,19 @@ export default function PokemonCard({ pokemon }: { pokemon: PokemonListItem }) {
     // </div>
 
     <div>
-      <div className="card w-32 cursor-pointer rounded-2xl h-45 flex flex-col px-2 py-3 logo">
-        <div className="w-full h-30 py-2 rounded-2xl flex items-center justify-center bg-amber-200 shadow-md">
+      <div className="card w-full max-w-32 cursor-pointer rounded-2xl h-auto min-h-45 flex flex-col px-2 py-3 logo transition-transform hover:scale-105 hover:-translate-y-1">
+        <div className="w-full p-2 rounded-2xl flex items-center justify-center bg-amber-200 shadow-md">
           <img
             src={`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokemon.url
               .split("/")
               .filter(Boolean)
               .pop()}.png`}
             alt={pokemon.name}
-            className="h-25 img"
+            className="w-full h-full max-h-25 object-contain img"
           />
         </div>
-        <div className=" rounded-b-2xl my-2 overflow-hidden">
-          <h2 className="font-jersey text-2xl text-amber-800 uppercase">
+        <div className="rounded-b-2xl my-2 overflow-hidden">
+          <h2 className="font-jersey text-lg sm:text-xl lg:text-2xl text-amber-800 uppercase text-center leading-tight">
             {pokemon.name}
           </h2>
         </div>

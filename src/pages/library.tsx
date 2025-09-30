@@ -2,6 +2,7 @@ import Navbar from "../components/navbar";
 import { useEffect, useMemo, useState } from "react";
 import PokemonCard from "../components/card";
 import PokemonInfo from "../components/pokemon-info";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Search } from "lucide-react";
 
 interface PokemonListItem {
@@ -74,14 +75,13 @@ export default function LibraryPage() {
 
   useEffect(() => {
     setLoading(true);
-    fetch("https://pokeapi.co/api/v2/pokemon?limit=650")
+    fetch("https://pokeapi.co/api/v2/pokemon?limit=151")
       .then((res) => res.json())
       .then(async (data) => {
         setPokemonList(data.results);
         setFilteredList(data.results);
-        
+
         const pokemonWithTypesPromises = data.results
-          .slice(0, 150)
           .map(async (pokemon: PokemonListItem) => {
             try {
               const response = await fetch(pokemon.url);
@@ -103,7 +103,6 @@ export default function LibraryPage() {
           pokemonWithTypesPromises
         );
         setPokemonWithTypes(pokemonWithTypesData);
-        console.log("Pokemon with types loaded:", pokemonWithTypesData.length);
       })
       .finally(() => setLoading(false));
   }, []);
@@ -217,6 +216,7 @@ export default function LibraryPage() {
 
   const totalPages = pages.length;
 
+
   const prevPage = () => {
     if (currentPage > 1) setCurrentPage((p) => p - 1);
   };
@@ -227,35 +227,35 @@ export default function LibraryPage() {
 
   return (
     <>
-      <main className="relative w-full">
+      <main className="relative w-full h-screen">
         <Navbar />
-        <div className="bg-[url('/image/library-bg.gif')] h-screen bg-cover bg-center flex flex-col justify-center items-center overflow-hidden">
-          <div className="w-4xl text-center flex flex-col gap-6 justify-center items-center mt-18">
-            <h1 className="text-3xl font-revalia text-amber-600 text-shadow-glow">
+        <div className="bg-[url('/image/library-bg.gif')] relative bg-cover bg-center min-h-screen flex flex-col gap-5 lg:gap-0 justify-center items-center overflow-y-auto pt-16 pb-5 sm:pt-20 px-4 sm:px-6 lg:px-8">
+          <div className="w-full max-w-sm sm:max-w-lg text-center flex flex-col gap-4 sm:gap-6 justify-center items-center">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-revalia text-amber-600 text-shadow-glow">
               Pokémon Library
             </h1>
 
-            <div className="flex gap-4 w-4xl max-w-xl items-center">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full items-stretch sm:items-center">
               {/* Search Bar */}
-              <div className="relative w-full mx-auto bg-[#f1e2b2] rounded-lg z-1">
+              <div className="relative w-full mx-auto bg-[#f1e2b2] rounded-lg">
                 <input
                   type="text"
                   placeholder="Search Pokémon..."
-                  className="w-full h-8 p-1.5 rounded-lg text-black outline-3 outline-amber-700 font-jersey text-2xl"
+                  className="w-full h-8 sm:h-8 p-2 sm:p-1.5 pr-12 sm:pr-10 rounded-lg text-black outline-3 outline-amber-700 font-jersey text-lg sm:text-xl lg:text-2xl"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
-                <button className="h-8 absolute right-0 bg-amber-700 text-white px-3 py-1 rounded-r-lg hover:bg-[#914007] transition-colors">
-                  <Search />
-                </button>
+                <div className="h-8 w-10 absolute top-0 right-0 bg-amber-700 text-white flex items-center justify-center rounded-r-lg hover:bg-[#914007] transition-colors">
+                  <Search size={20} />
+                </div>
               </div>
 
               {/* Type Filter Dropdown */}
-              <div className="flex justify-center">
+              <div className="flex justify-center w-full sm:w-auto">
                 <select
                   value={selectedType}
                   onChange={(e) => setSelectedType(e.target.value)}
-                  className="bg-[#f1e2b2] text-amber-800 font-jersey text-xl px-4 py-2 rounded-lg shadow-lg outline-none border-2 border-amber-700 hover:bg-amber-200 transition-colors cursor-pointer"
+                  className="w-full sm:w-auto bg-[#f1e2b2] text-amber-800 font-jersey text-lg sm:text-xl px-4 py-2.5 sm:py-2 rounded-lg shadow-lg outline-none border-2 border-amber-700 hover:bg-amber-200 transition-colors cursor-pointer"
                 >
                   <option value="">All Types</option>
                   {pokemonTypes.map((type) => (
@@ -267,22 +267,32 @@ export default function LibraryPage() {
               </div>
             </div>
 
-            {loading && <p>Loading Pokémons…</p>}
+            {loading && (
+              <p className="text-amber-200 font-jersey text-xl">
+                Loading Pokémons…
+              </p>
+            )}
           </div>
 
-          {/* Book */}
-          <div className="h-full flex justify-center items-center">
+          {/* Book - Desktop and Mobile Layouts */}
+          <div
+            className={`w-full flex justify-center items-center ${
+              loading ? "opacity-0" : "opacity-100"
+            } transition-opacity duration-500`}
+          >
             {/* Prev Button */}
-            <div className="mx-4">
+            <div className="mx-2 sm:mx-4">
               <button
-                className="bg-[#bb4d00] hover:bg-[#914007] text-zinc-200 font-pixelify text-xl py-2 px-4 rounded-xl shadow-md transition-all duration-100"
+                className="cursor-pointer bg-[#bb4d00] hover:bg-[#914007] disabled:bg-gray-600 disabled:cursor-not-allowed text-zinc-200 font-pixelify text-lg sm:text-xl py-2 px-3 sm:px-4 rounded-xl shadow-md transition-all duration-100"
                 disabled={currentPage === 1}
                 onClick={prevPage}
               >
                 ◀
               </button>
             </div>
-            <div className="bg-[url('/image/book.png')] bg-cover bg-center w-215 h-145">
+
+            {/* Desktop Book Layout - Hidden on mobile */}
+            <div className="hidden lg:block bg-[url('/image/book.png')] bg-cover bg-center w-215 h-full">
               <div className="w-120 h-143 flex justify-center items-center relative translate-x-107">
                 {pages.map((pageData, index) => {
                   const pageNumber = index + 1;
@@ -357,10 +367,38 @@ export default function LibraryPage() {
                 })}
               </div>
             </div>
+
+            {/* Mobile/Tablet Grid Layout */}
+            {/* <div className="lg:hidden w-full bg-pink-300 flex justify-center items-center">
+              
+            </div> */}
+            <div className="lg:hidden bg-[#f9e5b7] rounded-2xl shadow-xl p-2 w-full justify-center">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 place-items-center">
+                {pages[currentPage - 1]?.left
+                  .concat(pages[currentPage - 1]?.right || [])
+                  .map((pokemon) => (
+                    <button
+                      key={pokemon.name}
+                      onClick={() => {
+                        setIsCardOpen(true);
+                        fetchPokemonDetails(pokemon.url);
+                      }}
+                    >
+                      <PokemonCard pokemon={pokemon} />
+                    </button>
+                  ))}
+              </div>
+
+              {/* Page indicator */}
+              <div className="text-center text-amber-800 font-jersey text-lg">
+                {totalPages > 0 ? <span>Page {currentPage} of {totalPages}</span> : <span>No Results</span>}
+              </div>
+            </div>
+
             {/* Next Button */}
-            <div className="mx-4">
+            <div className="mx-2 sm:mx-4">
               <button
-                className="bg-[#bb4d00] hover:bg-[#914007] text-zinc-200 font-pixelify text-xl py-2 px-4 rounded-xl shadow-md"
+                className="cursor-pointer bg-[#bb4d00] hover:bg-[#914007] disabled:bg-gray-600 disabled:cursor-not-allowed text-zinc-200 font-pixelify text-lg sm:text-xl py-2 px-3 sm:px-4 rounded-xl shadow-md transition-all duration-100"
                 disabled={currentPage === totalPages}
                 onClick={nextPage}
               >
@@ -371,7 +409,7 @@ export default function LibraryPage() {
 
           {/* Pokémon Info Overlay */}
           <div
-            className={`bg-zinc-900/50 w-full h-full absolute z-10 ${
+            className={`bg-zinc-900/50 w-full h-full absolute top-0 z-10 ${
               isCardOpen ? "block" : "hidden"
             }`}
           >

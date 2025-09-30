@@ -78,48 +78,48 @@ export default function PokemonInfo({
           : selectedPokemonType == "normal"
           ? "from-[#A8A878] to-[#E0E0B0]"
           : ""
-      } to-62% w-6xl h-170 absolute top-0 bottom-0 my-auto left-0 right-0 mx-auto flex flex-row`}
+      } to-62% w-[95vw] max-w-6xl h-[90vh] max-h-170 absolute top-0 bottom-0 my-auto left-0 right-0 mx-auto flex flex-col lg:flex-row`}
     >
       <div className="relative w-full">
         {selectedPokemonType != "normal" && (
           <img
             src={`/image/card-bg/${selectedPokemonType}-bg.png`}
             alt={`${selectedPokemonType} type`}
-            className={`opacity-50 ${
+            className={`opacity-50 absolute top-0 left-0 right-0 mx-auto sm:h-55 lg:   ${
               selectedPokemonType == "grass"
-                ? "absolute bottom-20 -left-10 h-135"
+                ? "lg:bottom-15 lg:-left-10 lg:h-135"
                 : selectedPokemonType == "fire"
-                ? "absolute bottom-0 -left-15 h-160"
+                ? "lg:bottom-0 lg:-left-15 lg:h-160"
                 : selectedPokemonType == "water"
-                ? "absolute bottom-10 -left-5 h-130"
+                ? "lg:bottom-10 lg:-left-5 lg:h-130"
                 : selectedPokemonType == "bug"
-                ? "absolute bottom-15 -left-3 h-130"
+                ? "lg:bottom-15 lg:-left-3 lg:h-130"
                 : selectedPokemonType == "electric"
-                ? "absolute bottom-30 left-0 h-140"
+                ? "lg:bottom-30 lg:left-0 lg:h-140"
                 : selectedPokemonType == "ground"
-                ? "absolute top-20 left-0 w-250 h-auto"
+                ? "lg:top-20 lg:left-0 lg:w-250 lg:h-auto"
                 : selectedPokemonType == "poison"
-                ? "absolute top-0 -left-5 h-110"
+                ? "lg:top-0 lg:-left-5 lg:h-110"
                 : selectedPokemonType == "fighting"
-                ? "absolute top-0 left-0 h-110"
+                ? "lg:top-0 lg:left-0 lg:h-110"
                 : selectedPokemonType == "psychic"
-                ? "absolute top-0 -left-5 h-115"
+                ? "lg:top-0 lg:-left-5 lg:h-115"
                 : selectedPokemonType == "rock"
-                ? "absolute top-10 left-0 h-120"
+                ? "lg:top-10 lg:left-0 lg:h-120"
                 : selectedPokemonType == "ghost"
-                ? "absolute bottom-0 -left-10 h-160"
+                ? "lg:bottom-0 lg:-left-10 lg:h-160"
                 : selectedPokemonType == "ice"
-                ? "absolute top-10 left-0 h-110"
+                ? "lg:top-10 lg:left-0 lg:h-110"
                 : selectedPokemonType == "dragon"
-                ? "absolute top-0 left-0 h-130"
+                ? "lg:top-0 lg:left-0 lg:h-130"
                 : selectedPokemonType == "flying"
-                ? "absolute top-5 left-0 h-120"
+                ? "lg:top-5 lg:left-0 lg:h-120"
                 : selectedPokemonType == "dark"
-                ? "absolute top-0 -left-5 h-120"
+                ? "lg:top-0 lg:-left-5 lg:h-120"
                 : selectedPokemonType == "steel"
-                ? "absolute -top-5 left-0 h-120"
+                ? "-lg:top-5 lg:left-0 lg:h-120"
                 : selectedPokemonType == "fairy"
-                ? "absolute top-15 left-0 h-100"
+                ? "lg:top-15 lg:left-0 lg:h-100"
                 : ""
             }`}
           />
@@ -127,19 +127,19 @@ export default function PokemonInfo({
         <img
           src={`${pokemon?.image ? pokemon.image : ""}`}
           alt={pokemon?.name}
-          className={`h-100 absolute ${
+          className={`z-10 mx-auto absolute h-32 sm:h-40 lg:h-100 ${
             selectedPokemonType == "normal"
-              ? "top-0 bottom-0 my-auto left-0 right-0 mx-auto"
-              : "bottom-15 right-5"
+              ? "lg:top-0 lg:bottom-0 lg:my-auto lg:left-0 lg:right-0 lg:mx-auto"
+              : "lg:bottom-0 lg:right-0"
           } `}
         />
       </div>
       <div
-        className={`w-full pt-5 ${
+        className={`w-full px-0 ${
           selectedPokemonType == "dark" ? "text-zinc-200" : "text-zinc-800"
         }`}
       >
-        <h1 className="text-8xl font-jersey font-bold uppercase tracking-wider text-shadow-card">
+        <h1 className="text-3xl sm:text-4xl lg:text-8xl font-jersey font-bold uppercase tracking-wider text-shadow-card text-center lg:text-left">
           {pokemon?.name}
         </h1>
 
@@ -365,9 +365,9 @@ export default function PokemonInfo({
           setIsCardOpen(false);
           setSelectedPokemon(null);
         }}
-        className="absolute top-5 right-5 cursor-pointer"
+        className="absolute top-3 right-3 lg:top-5 lg:right-5 cursor-pointer z-20"
       >
-        <SquareX className="w-10 h-10 text-zinc-900 hover:text-red-400" />
+        <SquareX className="w-8 h-8 lg:w-10 lg:h-10 text-zinc-900 hover:text-red-400" />
       </button>
     </Card>
   );
