@@ -118,12 +118,12 @@ h3 {
   transition: transform 0.5s;
 }
 
-.page-right {
-  backface-visibility: hidden;
-}
-
 .flip .page-left {
   transform: rotateY(-180deg);
+}
+
+.flip .page-right {
+  transform: rotateY(0deg);
 }
 
 .left-content {

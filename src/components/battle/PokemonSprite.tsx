@@ -34,7 +34,7 @@ export default function PokemonSprite({
   const containerStyles =
     pokemonSprite.position === "player"
       ? "bottom-30 left-10 sm:left-35 lg:left-90"
-      : "top-50 right-80 sm:right-110";
+      : "top-45 right-60 sm:right-110";
 
   const spriteTransform =
     pokemonSprite.position === "player"
