@@ -33,31 +33,25 @@ export default function PokemonSprite({
 
   const containerStyles =
     pokemonSprite.position === "player"
-      ? { bottom: "100px", left: "300px" }
-      : { top: "200px", right: "400px" };
+      ? "bottom-30 left-10 sm:left-35 lg:left-90"
+      : "top-50 right-80 sm:right-110";
 
   const spriteTransform =
-    pokemonSprite.position === "player" ? "scaleX(-1) scale(2)" : "scale(2)";
+    pokemonSprite.position === "player"
+      ? "-scale-x-200 scale-200"
+      : "scale-150";
 
   return (
-    <div
-      style={{
-        position: "absolute",
-        ...containerStyles,
-        textAlign: "center",
-      }}
-    >
+    <div className={`absolute ${containerStyles} text-center`}>
       <img
         src={pokemonSprite.pokemon.sprite}
         alt={pokemonSprite.pokemon.name}
+        className={`w-40 h-40 transform ${spriteTransform} filter ${
+          pokemonSprite.isFlashing
+            ? "brightness-200 drop-shadow-[0_0_20px_#ffff00]"
+            : "drop-shadow-[4px_4px_8px_rgba(0,0,0,0.5)]"
+        } transition-filter duration-200`}
         style={{
-          width: "160px",
-          height: "160px",
-          transform: spriteTransform,
-          filter: pokemonSprite.isFlashing
-            ? "brightness(2) drop-shadow(0 0 20px #ffff00)"
-            : "drop-shadow(4px 4px 8px rgba(0,0,0,0.5))",
-          transition: "filter 0.2s",
           imageRendering: "pixelated",
         }}
       />

@@ -1,4 +1,4 @@
-import type { Skill } from '../../types/pokemon';
+import type { Skill } from "../../types/pokemon";
 
 interface SkillButtonProps {
   skill: Skill;
@@ -7,28 +7,21 @@ interface SkillButtonProps {
   onClick: () => void;
 }
 
-export default function SkillButton({ skillButton }: { skillButton: SkillButtonProps }) {
+export default function SkillButton({
+  skillButton,
+}: {
+  skillButton: SkillButtonProps;
+}) {
   return (
     <button
       onClick={skillButton.onClick}
       disabled={!skillButton.canUse}
-      style={{
-        background: skillButton.canUse ? '#f0e68c' : '#ccc',
-        border: '2px solid #8B4513',
-        borderRadius: '8px',
-        padding: '8px',
-        fontSize: '12px',
-        fontWeight: 'bold',
-        color: '#2c5234',
-        cursor: skillButton.canUse ? 'pointer' : 'not-allowed',
-        transition: 'all 0.2s',
-        opacity: skillButton.canUse ? 1 : 0.5
-      }}
+      className="bg-[#f0e68c] border-2 border-[#8B4513] rounded-lg sm:p-1.5  m-0.5 sm:m-1 text-xs font-bold text-[#2c5234] cursor-pointer transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50 hover:bg-[#e6d870]"
     >
       Skill {skillButton.index + 1}
       <br />
-      <span style={{ fontSize: '10px', fontWeight: 'normal' }}>
-        {skillButton.skill.name.replace(/-/g, ' ')}
+      <span className="text-xs font-normal capitalize">
+        {skillButton.skill.name.replace(/-/g, " ")}
       </span>
     </button>
   );

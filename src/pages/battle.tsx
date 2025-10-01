@@ -83,41 +83,9 @@ const opponentPokemon: PokemonSpriteProps = {
   return (
     <main>
       <Navbar />
-      <div
-        style={{
-          width: "100vw",
-          height: "100vh",
-          backgroundImage: "url(/image/background.png)",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          position: "relative",
-          overflow: "hidden",
-        }}
+      <div className="w-[100vw] h-[100vh] bg-[url('/image/background.png')] bg-cover bg-center relative overflow-hidden"
       >
         {showConfetti && <Confetti />}
-
-        {/* Display selected Pokemon info in top-right corner */}
-        {selectedPokemon && (
-          <div
-            style={{
-              position: "absolute",
-              top: "20px",
-              right: "20px",
-              background: "rgba(255, 248, 220, 0.9)",
-              border: "2px solid #8B4513",
-              borderRadius: "8px",
-              padding: "10px",
-              fontSize: "12px",
-              color: "#2c5234",
-              zIndex: 1000,
-              textAlign: "center",
-            }}
-          >
-            <div style={{ fontWeight: "bold", textTransform: "capitalize" }}>
-              {/* Your Pokemon: {selectedPokemon.name} */}
-            </div>
-          </div>
-        )}
 
         <PokemonSprite pokemonSprite={playerPokemon} />
 

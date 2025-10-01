@@ -78,7 +78,7 @@ export default function PokemonInfo({
           : selectedPokemonType == "normal"
           ? "from-[#A8A878] to-[#E0E0B0]"
           : ""
-      } to-62% w-[95vw] max-w-6xl h-[100vh] max-h-190 lg:h-[90vh] lg:max-h-170 absolute top-0 bottom-0 my-auto left-0 right-0 mx-auto flex flex-col lg:flex-row`}
+      } to-62% w-[95vw] max-w-6xl max-h-screen lg:h-[90vh] lg:max-h-170 absolute top-0 bottom-0 my-auto left-0 right-0 mx-auto flex flex-col lg:flex-row`}
     >
       <div className="relative w-full">
         {selectedPokemonType != "normal" && (

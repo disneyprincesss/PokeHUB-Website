@@ -1,21 +1,6 @@
 export default function LoadingScreen() {
-  return (  
-    <div
-      style={{
-        width: "100vw",
-        height: "100vh",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        backgroundImage: "url(/image/background.png)",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        color: "white",
-        fontSize: "24px",
-        fontWeight: "bold",
-        textShadow: "2px 2px 4px rgba(0,0,0,0.8)",
-      }}
-    >
+  return (
+    <div className="w-screen h-screen flex items-center justify-center bg-[url('/image/background.png')] bg-cover bg-center text-white text-2xl font-bold text-shadow-glow">
       Loading battle...
     </div>
   );

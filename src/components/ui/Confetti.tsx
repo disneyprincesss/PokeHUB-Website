@@ -1,23 +1,18 @@
 export default function Confetti() {
   return (
-    <div
-      style={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        width: "100vw",
-        height: "100vh",
-        pointerEvents: "none",
-        zIndex: 9999,
-        fontSize: 40,
-        textAlign: "center",
-      }}
+    <div className="pointer-events-none fixed top-0 left-0 w-full h-full z-50 text-4xl text-center"
     >
       {Array.from({ length: 30 }).map((_, i) => (
         <span
           key={i}
+          className={`
+            absolute
+            text-4xl
+            select-none
+            pointer-events-none
+            transition-transform
+          `}
           style={{
-            position: "absolute",
             left: `${Math.random() * 100}%`,
             top: `${Math.random() * 100}%`,
             color: [

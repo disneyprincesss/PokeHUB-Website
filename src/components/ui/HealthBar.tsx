@@ -18,20 +18,14 @@ export default function HealthBar({health}: {health: HealthBarProps}) {
   };
 
   return (
-    <div style={{
-      width,
-      height: '8px',
-      background: '#333',
-      borderRadius: '4px',
-      overflow: 'hidden',
-      border: '1px solid #000'
-    }}>
-      <div style={{
+    <div className={`w-${width} h-2 rounded overflow-hidden border border-black bg-gray-800`}
+    >
+      <div className={` h-full transition-all duration-500`}
+        style={{
         width: `${Math.max(0, (current / max) * 100)}%`,
-        height: '100%',
         background: getBarColor(),
-        transition: 'width 0.5s, background-color 0.3s'
-      }} />
+      }}
+      />
     </div>
   );
 };
