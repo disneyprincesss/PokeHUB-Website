@@ -109,6 +109,8 @@ export default function LibraryPage() {
   useEffect(() => {
     let filtered = pokemonWithTypes.length > 0 ? pokemonWithTypes : pokemonList;
 
+    console.log(filtered);
+
     // Apply name search filter
     if (searchTerm.trim() !== "") {
       filtered = filtered.filter((p) =>
@@ -368,9 +370,6 @@ export default function LibraryPage() {
             </div>
 
             {/* Mobile/Tablet Grid Layout */}
-            {/* <div className="lg:hidden w-full bg-pink-300 flex justify-center items-center">
-              
-            </div> */}
             <div className="lg:hidden bg-[#f9e5b7] rounded-2xl shadow-xl p-2 w-full justify-center">
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 place-items-center">
                 {pages[currentPage - 1]?.left
