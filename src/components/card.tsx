@@ -1,7 +1,4 @@
-interface PokemonListItem {
-  name: string;
-  url: string;
-}
+import type { PokemonListItem } from "@/types/pokemon";
 
 export default function PokemonCard({ pokemon }: { pokemon: PokemonListItem }) {
   return (

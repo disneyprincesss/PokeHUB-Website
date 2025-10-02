@@ -3,36 +3,11 @@ import { useEffect, useMemo, useState } from "react";
 import PokemonCard from "../components/card";
 import PokemonInfo from "../components/pokemon-info";
 import { Search } from "lucide-react";
-
-interface PokemonListItem {
-  name: string;
-  url: string;
-  types?: string[];
-}
+import type { EvolutionPokemon, PokemonDetails, PokemonListItem } from "@/types/pokemon";
 
 interface PageData {
   right: PokemonListItem[];
   left: PokemonListItem[];
-}
-
-interface EvolutionPokemon {
-  id: number;
-  name: string;
-  image: string;
-  types: { slot: number; type: { name: string } }[];
-}
-
-interface PokemonDetails {
-  id: number;
-  name: string;
-  height: number;
-  weight: number;
-  types: { slot: number; type: { name: string } }[];
-  stats: { base_stat: number; stat: { name: string } }[];
-  abilities: { is_hidden: boolean; ability: { name: string } }[];
-  description?: string;
-  image?: string;
-  evolutionChain?: EvolutionPokemon[];
 }
 
 export default function LibraryPage() {
@@ -80,8 +55,8 @@ export default function LibraryPage() {
         setPokemonList(data.results);
         setFilteredList(data.results);
 
-        const pokemonWithTypesPromises = data.results
-          .map(async (pokemon: PokemonListItem) => {
+        const pokemonWithTypes = data.results.map(
+          async (pokemon: PokemonListItem) => {
             try {
               const response = await fetch(pokemon.url);
               const pokemonData = await response.json();
@@ -96,10 +71,11 @@ export default function LibraryPage() {
               );
               return { ...pokemon, types: [] };
             }
-          });
+          }
+        );
 
         const pokemonWithTypesData = await Promise.all(
-          pokemonWithTypesPromises
+          pokemonWithTypes
         );
         setPokemonWithTypes(pokemonWithTypesData);
       })
@@ -108,8 +84,6 @@ export default function LibraryPage() {
 
   useEffect(() => {
     let filtered = pokemonWithTypes.length > 0 ? pokemonWithTypes : pokemonList;
-
-    console.log(filtered);
 
     // Apply name search filter
     if (searchTerm.trim() !== "") {
@@ -217,7 +191,6 @@ export default function LibraryPage() {
 
   const totalPages = pages.length;
 
-
   const prevPage = () => {
     if (currentPage > 1) setCurrentPage((p) => p - 1);
   };
@@ -232,7 +205,7 @@ export default function LibraryPage() {
         <Navbar />
         <div className="bg-[url('/image/library-bg.gif')] relative bg-cover bg-center min-h-screen flex flex-col gap-5 lg:gap-0 justify-center items-center overflow-y-auto pt-16 pb-5 sm:pt-20 px-4 sm:px-6 lg:px-8">
           <div className="w-full max-w-sm sm:max-w-lg text-center flex flex-col gap-4 sm:gap-6 justify-center items-center">
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-revalia text-amber-600 text-shadow-glow">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-revalia text-amber-600 text-shadow-[0_0_10px_rgba(225, 162, 55, 1)]">
               Pokémon Library
             </h1>
 
@@ -389,7 +362,13 @@ export default function LibraryPage() {
 
               {/* Page indicator */}
               <div className="text-center text-amber-800 font-jersey text-lg">
-                {totalPages > 0 ? <span>Page {currentPage} of {totalPages}</span> : <span>No Results</span>}
+                {totalPages > 0 ? (
+                  <span>
+                    Page {currentPage} of {totalPages}
+                  </span>
+                ) : (
+                  <span>No Results</span>
+                )}
               </div>
             </div>
 

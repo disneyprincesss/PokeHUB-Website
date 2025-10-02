@@ -6,7 +6,7 @@ export default function HomePage() {
       <main className="relative w-full h-full">
         <div className="bg-[url('/image/pokemonbg.gif')] h-screen bg-cover bg-center flex flex-col items-center justify-center text-zinc-200">
           <div className="w-full h-screen flex flex-col items-center justify-center bg-emerald-950/40 px-4">
-            <h1 className="font-jersey text-6xl sm:text-8xl md:text-9xl text-shadow-dropshadow text-center leading-tight">
+            <h1 className="font-jersey text-6xl sm:text-8xl md:text-9xl text-shadow-[0_8px_#2d2c2c] sm:text-shadow-[0_10px_#2d2c2c] text-center">
               WELCOME TO
             </h1>
             <img

@@ -4,30 +4,9 @@ import Navbar from "@/components/navbar";
 import Confetti from "@/components/ui/Confetti";
 import LoadingScreen from "@/components/ui/LoadingScreen";
 import { usePokemonBattle } from "@/hooks/usePokemonBattle";
-import type { Pokemon, Skill } from "@/types/pokemon";
+import type { BattleUIProps, PokemonSpriteProps} from "@/types/pokemon";
 
-
-interface PokemonSpriteProps {
-  pokemon: Pokemon;
-  currentHp: number;
-  maxHp: number;
-  currentMana: number;
-  isFlashing: boolean;
-  position: "player" | "opponent";
-}
-
-interface BattleUIProps {
-  playerPokemon: Pokemon;
-  currentMana: number;
-  turn: number;
-  winner: string | null;
-  battleLog: string[];
-  onSkillSelect: (skill: Skill) => void;
-  onSkipTurn: () => void;
-  onRestart: () => void;
-}
-
-export default function BattlePage({ selectedPokemon }: { selectedPokemon?: Pokemon | null }) {
+export default function BattlePage() {
   const {
     pokemons,
     currentHp,
@@ -77,13 +56,10 @@ const opponentPokemon: PokemonSpriteProps = {
     return <LoadingScreen />;
   }
 
-  console.log('Pokemons in battle:', pokemons);
-  console.log('Selected Pokemon:', selectedPokemon?.name);
-
   return (
     <main>
       <Navbar />
-      <div className="w-[100vw] h-[100vh] bg-[url('/image/background.png')] bg-cover bg-center relative overflow-hidden"
+      <div className="w-screen h-screen bg-[url('/image/background.png')] bg-cover bg-center relative overflow-hidden"
       >
         {showConfetti && <Confetti />}
 

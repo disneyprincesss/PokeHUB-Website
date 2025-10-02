@@ -1,7 +1,6 @@
 export default function Confetti() {
   return (
-    <div className="pointer-events-none fixed top-0 left-0 w-full h-full z-50 text-4xl text-center"
-    >
+    <div className="pointer-events-none fixed top-0 left-0 w-full h-full z-50 text-4xl text-center">
       {Array.from({ length: 30 }).map((_, i) => (
         <span
           key={i}

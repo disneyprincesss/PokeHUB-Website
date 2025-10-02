@@ -1,11 +1,4 @@
-import type { Skill } from "../../types/pokemon";
-
-interface SkillButtonProps {
-  skill: Skill;
-  index: number;
-  canUse: boolean;
-  onClick: () => void;
-}
+import type { SkillButtonProps } from "../../types/pokemon";
 
 export default function SkillButton({
   skillButton,

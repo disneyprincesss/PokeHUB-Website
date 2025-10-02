@@ -34,13 +34,13 @@ export default function Navbar() {
       <div className="hidden md:flex gap-8 lg:gap-15 text-neutral-100">
         <Link
           to="/library"
-          className="cursor-pointer hover:text-amber-600 font-jersey text-2xl lg:text-3xl hover:text-shadow-glow transition-colors"
+          className="cursor-pointer hover:text-amber-600 font-jersey text-2xl lg:text-3xl hover:text-shadow-[0_0_10px_rgba(225,162,55, 1)] transition-colors"
         >
           LIBRARY
         </Link>
         <Link
           to="/battle"
-          className="cursor-pointer hover:text-amber-600 font-jersey text-2xl lg:text-3xl hover:text-shadow-glow transition-colors"
+          className="cursor-pointer hover:text-amber-600 font-jersey text-2xl lg:text-3xl hover:text-shadow-[0_0_10px_rgba(225,162,55, 1)] transition-colors"
         >
           BATTLE
         </Link>
@@ -48,9 +48,7 @@ export default function Navbar() {
 
       {/* Mobile menu overlay */}
       <div
-        className={`${
-          isMenuOpen ? "block" : "hidden"
-        } md:hidden fixed`}
+        className={`${isMenuOpen ? "block" : "hidden"} md:hidden fixed`}
         onClick={toggleMenu}
       />
 
@@ -62,14 +60,14 @@ export default function Navbar() {
       >
         <Link
           to="/library"
-          className="cursor-pointer hover:text-amber-600 font-jersey text-3xl hover:text-shadow-glow transition-colors text-neutral-100"
+          className="cursor-pointer hover:text-amber-600 font-jersey text-3xl hover:text-shadow-[0_0_10px_rgba(225,162,55, 1)] transition-colors text-neutral-100"
           onClick={toggleMenu}
         >
           LIBRARY
         </Link>
         <Link
           to="/battle"
-          className="cursor-pointer hover:text-amber-600 font-jersey text-3xl hover:text-shadow-glow transition-colors text-neutral-100"
+          className="cursor-pointer hover:text-amber-600 font-jersey text-3xl hover:text-shadow-[0_0_10px_rgba(225,162,55, 1)] transition-colors text-neutral-100"
           onClick={toggleMenu}
         >
           BATTLE

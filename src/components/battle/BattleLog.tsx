@@ -1,3 +1,5 @@
+import { ScrollArea } from "../ui/scroll-area";
+
 interface BattleLogProps {
   battleLog: string[];
 }
@@ -5,36 +7,18 @@ interface BattleLogProps {
 export default function BattleLog({ battleLog }: BattleLogProps) {
   return (
     <div>
-      <div style={{
-        fontWeight: 'bold',
-        color: '#2c5234',
-        marginBottom: '4px',
-        fontSize: '14px'
-      }}>
-        Log:
-      </div>
-      <div style={{
-        background: 'rgba(255,255,255,0.8)',
-        border: '1px solid #8B4513',
-        borderRadius: '6px',
-        padding: '8px',
-        minHeight: '60px',
-        maxHeight: '100px',
-        overflowY: 'auto',
-        fontSize: '11px',
-        color: '#2c5234',
-        fontFamily: 'monospace'
-      }}>
+      <div className="font-bold text-[#2c5234] mb-1 text-sm">Log:</div>
+      <ScrollArea className="bg-[#fff8dcf2] border-2 border-[#8B4513] rounded-lg p-2 h-[100px] text-xs text-[#2c5234] font-mono ">
         {battleLog.length === 0 ? (
           <div>• Battle begins!</div>
         ) : (
           battleLog.slice(0, 4).map((log, idx) => (
-            <div key={idx} style={{ marginBottom: '2px' }}>
+            <div key={idx} className="mb-1">
               • {log}
             </div>
           ))
         )}
-      </div>
+      </ScrollArea>
     </div>
   );
 }

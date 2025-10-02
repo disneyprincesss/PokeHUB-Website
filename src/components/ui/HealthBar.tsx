@@ -1,9 +1,4 @@
-interface HealthBarProps {
-  current: number;
-  max: number;
-  type: 'health' | 'mana';
-  width?: string;
-}
+import type { HealthBarProps } from "@/types/pokemon";
 
 export default function HealthBar({health}: {health: HealthBarProps}) {
   const { current, max, type, width = '160px' } = health;

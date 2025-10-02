@@ -1,23 +1,6 @@
-import type { Pokemon, Skill } from "../../types/pokemon";
+import type { BattleUIProps, SkillButtonProps } from "../../types/pokemon";
 import BattleLog from "./BattleLog";
 import SkillButton from "./SkillButton";
-interface BattleUIProps {
-  playerPokemon: Pokemon;
-  currentMana: number;
-  turn: number;
-  winner: string | null;
-  battleLog: string[];
-  onSkillSelect: (skill: Skill) => void;
-  onSkipTurn: () => void;
-  onRestart: () => void;
-}
-
-interface SkillButtonProps {
-  skill: Skill;
-  index: number;
-  canUse: boolean;
-  onClick: () => void;
-}
 
 export default function BattleUI({ battle }: { battle: BattleUIProps }) {
   const skillButtons: SkillButtonProps[] = battle.playerPokemon.skills.map(
@@ -32,7 +15,7 @@ export default function BattleUI({ battle }: { battle: BattleUIProps }) {
   return (
     <div className="absolute bottom-10 right-3 sm:right-5 md:right-10 bg-[#fff8dcf2] border-3 border-[#8B4513] rounded-lg p-4 min-w-[220px] max-w-[275px] sm:min-w-[320px] sm:max-w-[400px] shadow-lg">
       {/* Turn Status */}
-      <div className="mb-2 font-bold text-[#2c5234] text-center text-lg border-b-2 border-[#8B4513] pb-2">
+      <div className="mb-2 font-bold text-[#2c5234] text-center text-lg border-b-2 border-[#8B4513] pb-2 capitalize">
         {battle.winner
           ? `🏆 Winner: ${battle.winner}!`
           : battle.turn === 0
@@ -69,18 +52,6 @@ export default function BattleUI({ battle }: { battle: BattleUIProps }) {
         <button
           className="w-full mt-3 bg-[#90EE90] border-2 border-[#8B4513] rounded-lg p-2 text-sm font-bold text-[#2c5234] cursor-pointer transition-all duration-200 hover:bg-[#77dd77]"
           onClick={battle.onRestart}
-          // style={{
-          //   width: "100%",
-          //   marginTop: "12px",
-          //   background: "#90EE90",
-          //   border: "2px solid #8B4513",
-          //   borderRadius: "8px",
-          //   padding: "10px",
-          //   fontSize: "14px",
-          //   fontWeight: "bold",
-          //   color: "#2c5234",
-          //   cursor: "pointer",
-          // }}
         >
           Next Battle
         </button>

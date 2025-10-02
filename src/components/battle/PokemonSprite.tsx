@@ -1,22 +1,5 @@
-import type { Pokemon } from "../../types/pokemon";
+import type { PokemonSpriteProps, PokemonStatsBoxProps } from "../../types/pokemon";
 import PokemonStatsBox from "../ui/PokemonStatsBox";
-
-interface PokemonSpriteProps {
-  pokemon: Pokemon;
-  currentHp: number;
-  maxHp: number;
-  currentMana: number;
-  isFlashing: boolean;
-  position: "player" | "opponent";
-}
-
-interface PokemonStatsBoxProps {
-  pokemon: Pokemon;
-  currentHp: number;
-  maxHp: number;
-  currentMana: number;
-  position: "top-right" | "bottom-left";
-}
 
 export default function PokemonSprite({
   pokemonSprite,

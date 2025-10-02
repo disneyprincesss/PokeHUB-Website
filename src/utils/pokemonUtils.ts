@@ -1,5 +1,3 @@
-// utils/pokemonUtils.ts
-
 import { GAME_CONFIG } from '../constants/gameConstants';
 import type { Pokemon, Skill, BattleResult } from '../types/pokemon';
 

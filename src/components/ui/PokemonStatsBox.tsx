@@ -1,21 +1,6 @@
-import type { Pokemon } from "../../types/pokemon";
+import type { HealthBarProps, PokemonStatsBoxProps } from "../../types/pokemon";
 import { GAME_CONFIG } from "../../constants/gameConstants";
 import HealthBar from "./HealthBar";
-
-interface PokemonStatsBoxProps {
-  pokemon: Pokemon;
-  currentHp: number;
-  maxHp: number;
-  currentMana: number;
-  position: "top-right" | "bottom-left";
-}
-
-interface HealthBarProps {
-  current: number;
-  max: number;
-  type: "health" | "mana";
-  width?: string;
-}
 
 export default function PokemonStatsBox({
   pokemonStatus,

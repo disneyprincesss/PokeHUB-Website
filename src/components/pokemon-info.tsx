@@ -4,26 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 import { Progress } from "./ui/progress";
 import { ScrollArea } from "./ui/scroll-area";
-
-interface EvolutionPokemon {
-  id: number;
-  name: string;
-  image: string;
-  types: { slot: number; type: { name: string } }[];
-}
-
-interface PokemonDetails {
-  id: number;
-  name: string;
-  height: number;
-  weight: number;
-  types: { slot: number; type: { name: string } }[];
-  stats: { base_stat: number; stat: { name: string } }[];
-  abilities: { is_hidden: boolean; ability: { name: string } }[];
-  description?: string;
-  image?: string;
-  evolutionChain?: EvolutionPokemon[];
-}
+import type { PokemonDetails } from "@/types/pokemon";
 
 interface PokemonInfoProps {
   pokemon: PokemonDetails | null;
@@ -139,7 +120,7 @@ export default function PokemonInfo({
           selectedPokemonType == "dark" ? "text-zinc-200" : "text-zinc-800"
         } `}
       >
-        <h1 className="text-5xl sm:text-7xl lg:text-8xl font-jersey font-bold uppercase tracking-wider text-shadow-card text-center lg:text-left z-10">
+        <h1 className="text-5xl sm:text-7xl lg:text-8xl font-jersey font-bold uppercase tracking-wider text-shadow-[5px_5px_6px_rgba(0,0,0,0.5)] sm:text-shadow-[8px_8px_10px_rgba(0,0,0,0.5)] text-center lg:text-left z-10">
           {pokemon?.name}
         </h1>
 
@@ -294,7 +275,7 @@ export default function PokemonInfo({
           <TabsContent value="stats" className="justify-center items-center">
             <div className="stats">
               <h3>Stats</h3>
-              <ul className="flex flex-col gap-4 w-100 text-xl sm:text-2xl sm:w-125 mt-3">
+              <ul className="flex flex-col gap-4 w-100 h-78 sm:h-68 text-xl sm:text-2xl sm:w-125 mt-3">
                 {pokemon?.stats.map((s) => {
                   let statName = s.stat.name
                     .split("-")
@@ -320,7 +301,7 @@ export default function PokemonInfo({
           <TabsContent value="evolution">
             <div>
               <h3>Evolution Chain</h3>
-              <ScrollArea className="h-80 lg:h-98 w-full">
+              <ScrollArea className="h-80 sm:h-70 lg:h-98 w-full">
                 <div className="flex items-center gap-4 flex-wrap">
                   {pokemon?.evolutionChain &&
                   pokemon.evolutionChain.length > 1 ? (

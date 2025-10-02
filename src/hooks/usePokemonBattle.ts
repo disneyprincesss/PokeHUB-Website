@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
-import type { Pokemon, Skill } from '../types/pokemon';
 import { fetchPokemonById, getRandomId, calculateDamage } from '../utils/pokemonUtils';
 import { GAME_CONFIG, TAUNTS } from '../constants/gameConstants';
+import type { Pokemon, Skill } from '@/types/pokemon';
 
-// ✅ Accept playerPokemon as an optional argument
+// Accept playerPokemon as an optional argument
 export const usePokemonBattle = (playerPokemon?: Pokemon) => {
   const [pokemons, setPokemons] = useState<Pokemon[]>([]);
   const [currentHp, setCurrentHp] = useState<number[]>([0, 0]);
@@ -22,7 +22,7 @@ export const usePokemonBattle = (playerPokemon?: Pokemon) => {
       let pokes: Pokemon[];
 
       if (playerPokemon) {
-        // ✅ Use the selected Pokémon + a random opponent
+        // Use the selected Pokémon + a random opponent
         const opponent = await fetchPokemonById(getRandomId());
         pokes = [playerPokemon, opponent];
       } else {
@@ -35,7 +35,7 @@ export const usePokemonBattle = (playerPokemon?: Pokemon) => {
 
       setPokemons(pokes);
 
-      // ✅ Adjust to your stats structure
+      // Adjust to your stats structure
       const hp1 = pokes[0].stats.find(s => s.name === 'hp')?.value || 100;
       const hp2 = pokes[1].stats.find(s => s.name === 'hp')?.value || 100;
       setCurrentHp([hp1, hp2]);
@@ -50,7 +50,7 @@ export const usePokemonBattle = (playerPokemon?: Pokemon) => {
     }
   };
 
-  // ✅ Re-run battle init when playerPokemon changes
+  // Re-run battle init when playerPokemon changes
   useEffect(() => {
     initializeBattle();
   }, [playerPokemon]);
@@ -77,7 +77,7 @@ export const usePokemonBattle = (playerPokemon?: Pokemon) => {
             Math.min(GAME_CONFIG.INITIAL_MANA, mana[1] + GAME_CONFIG.SKIP_MANA_GAIN)
           ]);
           setBattleLog(log => [
-            `💤 ${pokemons[1].name} skips turn and regains ${GAME_CONFIG.SKIP_MANA_GAIN} mana.`,
+            `💤 ${pokemons[1].name} Skips turn and regains ${GAME_CONFIG.SKIP_MANA_GAIN} mana.`,
             ...log,
           ]);
           setTurn(0);
