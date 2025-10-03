@@ -53,7 +53,7 @@ export default function PokemonInfo({
           : selectedPokemonType == "dark"
           ? "from-[#010101] to-[#4A4251]"
           : selectedPokemonType == "steel"
-          ? "from-[#111111] to-[#C9C9C9]"
+          ? "from-[#313030] to-[#B2B2B2]"
           : selectedPokemonType == "fairy"
           ? "from-[#9E004C] to-[#F688B6]"
           : selectedPokemonType == "normal"
@@ -117,7 +117,11 @@ export default function PokemonInfo({
       </div>
       <div
         className={`w-full pb-5 lg:pb-0 flex flex-col justify-center items-center lg:items-start lg:justify-start px-0 absolute bottom-0 lg:static ${
-          selectedPokemonType == "dark" ? "text-zinc-200" : "text-zinc-800"
+          selectedPokemonType == "dark" ||
+          selectedPokemonType == "ghost" ||
+          selectedPokemonType == "steel"
+            ? "text-zinc-200"
+            : "text-zinc-800"
         } `}
       >
         <h1 className="text-5xl sm:text-7xl lg:text-8xl font-jersey font-bold uppercase tracking-wider text-shadow-[5px_5px_6px_rgba(0,0,0,0.5)] sm:text-shadow-[8px_8px_10px_rgba(0,0,0,0.5)] text-center lg:text-left z-10">
@@ -126,9 +130,42 @@ export default function PokemonInfo({
 
         <Tabs defaultValue="about">
           <TabsList>
-            <TabsTrigger value="about">About</TabsTrigger>
-            <TabsTrigger value="stats">Base Stats</TabsTrigger>
-            <TabsTrigger value="evolution">Evolution</TabsTrigger>
+            <TabsTrigger
+              value="about"
+              className={`${
+                selectedPokemonType == "dark" ||
+                selectedPokemonType == "ghost" ||
+                selectedPokemonType == "steel"
+                  ? "text-zinc-200 border-b-zinc-200"
+                  : ""
+              }`}
+            >
+              About
+            </TabsTrigger>
+            <TabsTrigger
+              value="stats"
+              className={`${
+                selectedPokemonType == "dark" ||
+                selectedPokemonType == "ghost" ||
+                selectedPokemonType == "steel"
+                  ? "text-zinc-200 border-b-zinc-200"
+                  : ""
+              }`}
+            >
+              Base Stats
+            </TabsTrigger>
+            <TabsTrigger
+              value="evolution"
+              className={`${
+                selectedPokemonType == "dark" ||
+                selectedPokemonType == "ghost" ||
+                selectedPokemonType == "steel"
+                  ? "text-zinc-200 border-b-zinc-200"
+                  : ""
+              }`}
+            >
+              Evolution
+            </TabsTrigger>
           </TabsList>
           <TabsContent value="about">
             <div className="flex items-center">

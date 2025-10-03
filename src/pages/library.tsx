@@ -49,7 +49,7 @@ export default function LibraryPage() {
 
   useEffect(() => {
     setLoading(true);
-    fetch("https://pokeapi.co/api/v2/pokemon?limit=151")
+    fetch("https://pokeapi.co/api/v2/pokemon?limit=800")
       .then((res) => res.json())
       .then(async (data) => {
         setPokemonList(data.results);
@@ -203,7 +203,7 @@ export default function LibraryPage() {
     <>
       <main className="relative w-full h-screen">
         <Navbar />
-        <div className="bg-[url('/image/library-bg.gif')] relative bg-cover bg-center min-h-screen flex flex-col gap-5 lg:gap-0 justify-center items-center overflow-y-auto pt-16 pb-5 sm:pt-20 px-4 sm:px-6 lg:px-8">
+        <div className="bg-[url('/image/library-bg.gif')] relative bg-cover bg-center min-h-screen flex flex-col gap-5 lg:gap-0 justify-center items-center overflow-hidden pt-16 pb-5 sm:pt-20 px-4 sm:px-6 lg:px-8">
           <div className="w-full max-w-sm sm:max-w-lg text-center flex flex-col gap-4 sm:gap-6 justify-center items-center">
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-revalia text-amber-600 text-shadow-[0_0_10px_rgba(225, 162, 55, 1)]">
               Pokémon Library
