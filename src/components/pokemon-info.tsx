@@ -5,6 +5,8 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 import { Progress } from "./ui/progress";
 import { ScrollArea } from "./ui/scroll-area";
 import type { PokemonDetails } from "@/types/pokemon";
+import { apiService } from "@/services/api";
+import { useEffect, useState } from "react";
 
 interface PokemonInfoProps {
   pokemon: PokemonDetails | null;
@@ -18,7 +20,56 @@ export default function PokemonInfo({
   setSelectedPokemon,
 }: PokemonInfoProps) {
   const selectedPokemonType = pokemon?.types[0].type.name || "";
+  const id = pokemon?.id;
+  const [nickname, setNickname] = useState<string | null>(null);
+  const [editing, setEditing] = useState(false);
+  const [input, setInput] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  useEffect(() => {
+    if (!id) return;
+    
+    let mounted = true;
+    (async () => {
+      try {
+        const res = await apiService.getNickname(id);
+        if (mounted) setNickname(res.data.nickname);
+      } catch (e) {
+        // ignore if endpoint not available or offline
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, [id]);
 
+  const startEdit = () => {
+    setInput(nickname || "");
+    setEditing(true);
+    setError(null);
+  };
+
+  const save = async () => {
+    if (!id) return;
+    
+    try {
+      setLoading(true);
+      setError(null);
+      const trimmed = input.trim();
+      if (trimmed.length === 0) {
+        await apiService.deleteNickname(id);
+        setNickname(null);
+      } else {
+        const res = await apiService.setNickname(id, trimmed);
+        setNickname(res.data.nickname);
+      }
+      setEditing(false);
+    } catch (e: any) {
+      setError(e?.message || "Failed to save nickname");
+    } finally {
+      setLoading(false);
+    }
+  };
   return (
     <Card
       className={`bg-gradient-to-r ${
@@ -127,6 +178,71 @@ export default function PokemonInfo({
         <h1 className="text-5xl sm:text-7xl lg:text-8xl font-jersey font-bold uppercase tracking-wider text-shadow-[5px_5px_6px_rgba(0,0,0,0.5)] sm:text-shadow-[8px_8px_10px_rgba(0,0,0,0.5)] text-center lg:text-left z-10">
           {pokemon?.name}
         </h1>
+
+        {/* Nickname Section */}
+        <div className="mt-4 mb-6 flex flex-col items-center lg:items-start">
+          {editing ? (
+            <div className="flex flex-col items-center lg:items-start gap-2 w-full max-w-md">
+              <input
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                maxLength={40}
+                placeholder="Enter nickname (empty to clear)"
+                className={`w-full px-3 py-2 rounded-lg border-2 focus:outline-none focus:ring-2 ${
+                  selectedPokemonType == "dark" ||
+                  selectedPokemonType == "ghost" ||
+                  selectedPokemonType == "steel"
+                    ? "bg-zinc-800 border-zinc-600 text-zinc-200 focus:ring-zinc-400"
+                    : "bg-white border-zinc-300 text-zinc-800 focus:ring-blue-500"
+                }`}
+                disabled={loading}
+              />
+              <div className="flex gap-2">
+                <button 
+                  onClick={save} 
+                  disabled={loading} 
+                  className="px-4 py-2 bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white rounded-lg font-medium transition-colors"
+                >
+                  {loading ? 'Saving...' : 'Save'}
+                </button>
+                <button 
+                  onClick={() => setEditing(false)} 
+                  disabled={loading} 
+                  className="px-4 py-2 bg-gray-500 hover:bg-gray-600 disabled:opacity-50 text-white rounded-lg font-medium transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
+              {error && <span className="text-sm text-red-500 font-medium">{error}</span>}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center lg:items-start gap-2">
+              {nickname && (
+                <div className={`text-2xl font-medium ${
+                  selectedPokemonType == "dark" ||
+                  selectedPokemonType == "ghost" ||
+                  selectedPokemonType == "steel"
+                    ? "text-zinc-200"
+                    : "text-zinc-800"
+                }`}>
+                  "{nickname}"
+                </div>
+              )}
+              <button 
+                onClick={startEdit} 
+                className={`text-lg font-medium underline hover:no-underline transition-all ${
+                  selectedPokemonType == "dark" ||
+                  selectedPokemonType == "ghost" ||
+                  selectedPokemonType == "steel"
+                    ? "text-zinc-300 hover:text-zinc-100"
+                    : "text-zinc-600 hover:text-zinc-800"
+                }`}
+              >
+                {nickname ? 'Edit nickname' : 'Add nickname'}
+              </button>
+            </div>
+          )}
+        </div>
 
         <Tabs defaultValue="about">
           <TabsList>
