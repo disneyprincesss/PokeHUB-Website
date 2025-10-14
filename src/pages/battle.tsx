@@ -57,9 +57,9 @@ const opponentPokemon: PokemonSpriteProps = {
   }
 
   return (
-    <main>
+    <main className="w-full h-screen overflow-hidden">
       <Navbar />
-      <div className="w-screen h-screen bg-[url('/image/background.png')] bg-cover bg-center relative overflow-hidden"
+      <div className="w-full h-full bg-[url('/image/background.png')] bg-cover bg-center relative overflow-hidden"
       >
         {showConfetti && <Confetti />}
 

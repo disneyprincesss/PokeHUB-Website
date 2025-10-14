@@ -5,6 +5,8 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 import { Progress } from "./ui/progress";
 import { ScrollArea } from "./ui/scroll-area";
 import type { PokemonDetails } from "@/types/pokemon";
+import { apiService } from "@/services/api";
+import { useEffect, useState } from "react";
 
 interface PokemonInfoProps {
   pokemon: PokemonDetails | null;
@@ -18,7 +20,56 @@ export default function PokemonInfo({
   setSelectedPokemon,
 }: PokemonInfoProps) {
   const selectedPokemonType = pokemon?.types[0].type.name || "";
+  const id = pokemon?.id;
+  const [nickname, setNickname] = useState<string | null>(null);
+  const [editing, setEditing] = useState(false);
+  const [input, setInput] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  useEffect(() => {
+    if (!id) return;
+    
+    let mounted = true;
+    (async () => {
+      try {
+        const res = await apiService.getNickname(id);
+        if (mounted) setNickname(res.data.nickname);
+      } catch (e) {
+        // ignore if endpoint not available or offline
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, [id]);
 
+  const startEdit = () => {
+    setInput(nickname || "");
+    setEditing(true);
+    setError(null);
+  };
+
+  const save = async () => {
+    if (!id) return;
+    
+    try {
+      setLoading(true);
+      setError(null);
+      const trimmed = input.trim();
+      if (trimmed.length === 0) {
+        await apiService.deleteNickname(id);
+        setNickname(null);
+      } else {
+        const res = await apiService.setNickname(id, trimmed);
+        setNickname(res.data.nickname);
+      }
+      setEditing(false);
+    } catch (e: any) {
+      setError(e?.message || "Failed to save nickname");
+    } finally {
+      setLoading(false);
+    }
+  };
   return (
     <Card
       className={`bg-gradient-to-r ${
@@ -59,7 +110,7 @@ export default function PokemonInfo({
           : selectedPokemonType == "normal"
           ? "from-[#A8A878] to-[#E0E0B0]"
           : ""
-      } to-62% w-[95vw] max-w-6xl max-h-screen lg:h-[90vh] lg:max-h-170 absolute top-0 bottom-0 my-auto left-0 right-0 mx-auto flex flex-col lg:flex-row`}
+      } w-[95vw] max-w-6xl max-h-[90vh] sm:max-h-screen lg:max-h-[80vh] absolute inset-0 my-auto mx-auto flex flex-col lg:flex-row overflow-y-auto lg:overflow-hidden rounded-2xl`}
     >
       <div className="relative w-full">
         {selectedPokemonType != "normal" && (
@@ -115,21 +166,81 @@ export default function PokemonInfo({
           } `}
         />
       </div>
-      <div
-        className={`w-full pb-5 lg:pb-0 flex flex-col justify-center items-center lg:items-start lg:justify-start px-0 absolute bottom-0 lg:static ${
-          selectedPokemonType == "dark" ||
-          selectedPokemonType == "ghost" ||
-          selectedPokemonType == "steel"
-            ? "text-zinc-200"
-            : "text-zinc-800"
-        } `}
-      >
-        <h1 className="text-5xl sm:text-7xl lg:text-8xl font-jersey font-bold uppercase tracking-wider text-shadow-[5px_5px_6px_rgba(0,0,0,0.5)] sm:text-shadow-[8px_8px_10px_rgba(0,0,0,0.5)] text-center lg:text-left z-10">
+      
+      {/* Mobile Pokemon Info Container */}
+      <div className="lg:hidden w-full mt-48 sm:mt-52 px-3 sm:px-4 relative z-20">
+        <h1 className="text-white text-2xl sm:text-3xl font-jersey font-bold uppercase tracking-wider text-shadow-[3px_3px_4px_rgba(0,0,0,0.5)] text-center leading-tight break-words">
           {pokemon?.name}
         </h1>
-
-        <Tabs defaultValue="about">
-          <TabsList>
+        
+        {/* Mobile Nickname Section */}
+        <div className="mt-4 mb-6 flex flex-col items-center">
+          {editing ? (
+            <div className="flex flex-col items-center gap-2 w-full max-w-md">
+              <input
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                maxLength={40}
+                placeholder="Enter nickname (empty to clear)"
+                className={`w-full px-3 py-2 rounded-lg border-2 focus:outline-none focus:ring-2 ${
+                  selectedPokemonType == "dark" ||
+                  selectedPokemonType == "ghost" ||
+                  selectedPokemonType == "steel"
+                    ? "bg-zinc-800 border-zinc-600 text-zinc-200 focus:ring-zinc-400"
+                    : "bg-white border-zinc-300 text-zinc-800 focus:ring-blue-500"
+                }`}
+                disabled={loading}
+              />
+              <div className="flex gap-2">
+                <button 
+                  onClick={save} 
+                  disabled={loading} 
+                  className="cursor-pointer px-4 py-2 bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white rounded-lg font-medium transition-colors"
+                >
+                  {loading ? 'Saving...' : 'Save'}
+                </button>
+                <button 
+                  onClick={() => setEditing(false)} 
+                  disabled={loading} 
+                  className="cursor-pointer px-4 py-2 bg-gray-500 hover:bg-gray-600 disabled:opacity-50 text-white rounded-lg font-medium transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
+              {error && <span className="text-sm text-red-500 font-medium">{error}</span>}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center gap-2">
+              {nickname && (
+                <div className={`text-xl font-medium ${
+                  selectedPokemonType == "dark" ||
+                  selectedPokemonType == "ghost" ||
+                  selectedPokemonType == "steel"
+                    ? "text-zinc-200"
+                    : "text-zinc-800"
+                }`}>
+                  "{nickname}"
+                </div>
+              )}
+              <button 
+                onClick={startEdit} 
+                className={`cursor-pointer text-lg font-medium underline hover:no-underline transition-all ${
+                  selectedPokemonType == "dark" ||
+                  selectedPokemonType == "ghost" ||
+                  selectedPokemonType == "steel"
+                    ? "text-zinc-300 hover:text-zinc-100"
+                    : "text-zinc-600 hover:text-zinc-800"
+                }`}
+              >
+                {nickname ? 'Edit nickname' : 'Add nickname'}
+              </button>
+            </div>
+          )}
+        </div>
+        
+        {/* Mobile Tabs Section */}
+        <Tabs defaultValue="about" className="w-full mt-4">
+          <TabsList className="flex items-center justify-between overflow-x-auto">
             <TabsTrigger
               value="about"
               className={`${
@@ -167,10 +278,10 @@ export default function PokemonInfo({
               Evolution
             </TabsTrigger>
           </TabsList>
-          <TabsContent value="about">
-            <div className="flex items-center">
-              <h3>Species:</h3>
-              <div className="ml-2 flex items-center">
+          <TabsContent value="about" className="px-3 sm:px-4 max-h-[35vh] overflow-y-auto pr-3 scrollbar-thin scrollbar-thumb-white/40 scrollbar-track-transparent">
+            <div className="mt-1 flex items-center flex-wrap gap-2">
+              <h3 className="text-white">Species:</h3>
+              <div className="ml-2 flex items-center flex-wrap">
                 {pokemon?.types.map((t) => (
                   <Tooltip>
                     <TooltipTrigger>
@@ -178,7 +289,7 @@ export default function PokemonInfo({
                         key={t.slot}
                         src={`/image/pokemon-type/${t.type.name}.png`}
                         alt={`${t.type.name} type`}
-                        className="h-9 sm:h-10 mr-1"
+                        className="h-8 sm:h-10 mr-1"
                       />
                     </TooltipTrigger>
                     <TooltipContent>{t.type.name}</TooltipContent>
@@ -186,9 +297,9 @@ export default function PokemonInfo({
                 ))}
               </div>
             </div>
-            <div className="flex items-center flex-wrap">
-              <h3>Abilities:</h3>
-              <div className="ml-2 flex flex-wrap items-center">
+            <div className="flex items-center flex-wrap gap-2">
+              <h3 className="text-white">Abilities:</h3>
+              <div className="ml-2 flex flex-wrap items-center gap-4">
                 {pokemon?.abilities.map((a) => {
                   let abilityName = a.ability.name
                     .split(" ")
@@ -275,7 +386,337 @@ export default function PokemonInfo({
                     <Tooltip>
                       <TooltipTrigger>
                         <span
-                          className={` text-xl sm:text-2xl px-2 py-1 mr-2 rounded-lg shadow-md text-white ${abilityColor}`}
+                          className={` text-lg sm:text-2xl px-2 py-1 mr-2 rounded-lg shadow-md text-white ${abilityColor}`}
+                        >
+                          {abilityName}
+                        </span>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        {a.is_hidden ? "Hidden Ability" : "Normal Ability"}
+                      </TooltipContent>
+                    </Tooltip>
+                  );
+                })}
+              </div>
+            </div>
+            <div className="flex items-center">
+              <h3 className="text-white">Height:</h3>
+              <span className="text-white text-xl sm:text-2xl ml-5">
+                {pokemon?.height
+                  ? (pokemon?.height / 10).toFixed(2) + " m"
+                  : "Unknown"}
+              </span>
+            </div>
+            <div className="flex items-center">
+              <h3 className="text-white">Weight:</h3>
+              <span className="text-white text-xl sm:text-2xl ml-4">
+                {pokemon?.weight
+                  ? (pokemon?.weight / 10).toFixed(2) + " kg"
+                  : "Unknown"}
+              </span>
+            </div>
+            <div className="mt-4">
+              <h3 className="text-white mb-2">Description</h3>
+              <p className="text-white text-lg sm:text-xl leading-relaxed break-words whitespace-pre-line">
+                {pokemon?.description}
+              </p>
+            </div>
+          </TabsContent>
+          <TabsContent value="stats" className="justify-center items-center px-3 sm:px-4 max-h-[40vh]">
+            <div className="stats">
+              <h3 className="text-white">Stats</h3>
+              <ul className="flex flex-col gap-4 w-full max-w-full text-lg sm:text-2xl sm:w-125 mt-3">
+                {pokemon?.stats.map((s) => {
+                  let statName = s.stat.name
+                    .split("-")
+                    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+                    .join("-");
+
+                  return (
+                    <li
+                      key={s.stat.name}
+                      className="w-full flex items-center gap-4 "
+                    >
+                      <span className="w-2/3 whitespace-nowrap text-white">{statName}</span>
+                      <div className="w-full flex items-center justify-between">
+                        <Progress value={s.base_stat} className="w-5/6" />
+                        <span className="text-white">{s.base_stat}</span>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          </TabsContent>
+          <TabsContent value="evolution" className="px-3 sm:px-4 max-h-[40vh] overflow-y-auto">
+            <div>
+              <h3 className="text-white">Evolution Chain</h3>
+              <ScrollArea className="h-80 sm:h-80 lg:h-98 w-full">
+                <div className="flex items-center gap-4 flex-wrap p-2">
+                  {pokemon?.evolutionChain &&
+                  pokemon.evolutionChain.length > 1 ? (
+                    pokemon.evolutionChain.map((evolution, index) => (
+                      <div key={evolution.id} className="flex items-center mb-4">
+                        <div className="bg-white/20 rounded-lg p-3 flex flex-col items-center min-w-32 h-52">
+                          <img
+                            src={evolution.image}
+                            alt={evolution.name}
+                            className="w-24 h-24 sm:w-28 sm:h-28 object-contain"
+                          />
+                          <span className="text-sm sm:text-lg capitalize font-semibold text-center mt-2 text-white">
+                            {evolution.name}
+                          </span>
+                          <div className="flex gap-1 mt-2">
+                            {evolution.types.map((type) => (
+                              <img
+                                key={type.slot}
+                                src={`/image/pokemon-type/${type.type.name}.png`}
+                                alt={type.type.name}
+                                className="w-6 h-6 sm:w-7 sm:h-7"
+                              />
+                            ))}
+                          </div>
+                        </div>
+                        {index < (pokemon.evolutionChain?.length || 0) - 1 && (
+                          <span className="mx-2 text-lg sm:text-xl">→</span>
+                        )}
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-base sm:text-lg p-4 text-white">This Pokémon does not evolve.</p>
+                  )}
+                </div>
+              </ScrollArea>
+            </div>
+          </TabsContent>
+        </Tabs>
+      </div>
+      <div
+        className={`hidden lg:flex w-full pb-5 lg:pb-0 flex-col justify-center items-center lg:items-start lg:justify-start px-0 absolute bottom-0 lg:static ${
+          selectedPokemonType == "dark" ||
+          selectedPokemonType == "ghost" ||
+          selectedPokemonType == "steel"
+            ? "text-zinc-200"
+            : "text-zinc-800"
+        } max-h-[70vh] overflow-y-auto lg:overflow-visible px-3 sm:px-4`}
+      >
+        <h1 className="text-4xl sm:text-6xl lg:text-8xl font-jersey font-bold uppercase tracking-wider text-shadow-[5px_5px_6px_rgba(0,0,0,0.5)] sm:text-shadow-[8px_8px_10px_rgba(0,0,0,0.5)] text-center lg:text-left z-10">
+          {pokemon?.name}
+        </h1>
+
+        {/* Nickname Section */}
+        <div className="mt-4 mb-6 flex flex-col items-center lg:items-start">
+          {editing ? (
+            <div className="flex flex-col items-center lg:items-start gap-2 w-full max-w-md">
+              <input
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                maxLength={40}
+                placeholder="Enter nickname (empty to clear)"
+                className={`w-full px-3 py-2 rounded-lg border-2 focus:outline-none focus:ring-2 ${
+                  selectedPokemonType == "dark" ||
+                  selectedPokemonType == "ghost" ||
+                  selectedPokemonType == "steel"
+                    ? "bg-zinc-800 border-zinc-600 text-zinc-200 focus:ring-zinc-400"
+                    : "bg-white border-zinc-300 text-zinc-800 focus:ring-blue-500"
+                }`}
+                disabled={loading}
+              />
+              <div className="flex gap-2">
+                <button 
+                  onClick={save} 
+                  disabled={loading} 
+                  className="cursor-pointer px-4 py-2 bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white rounded-lg font-medium transition-colors"
+                >
+                  {loading ? 'Saving...' : 'Save'}
+                </button>
+                <button 
+                  onClick={() => setEditing(false)} 
+                  disabled={loading} 
+                  className="cursor-pointer px-4 py-2 bg-gray-500 hover:bg-gray-600 disabled:opacity-50 text-white rounded-lg font-medium transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
+              {error && <span className="text-sm text-red-500 font-medium">{error}</span>}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center lg:items-start gap-2">
+              {nickname && (
+                <div className={`text-2xl font-medium ${
+                  selectedPokemonType == "dark" ||
+                  selectedPokemonType == "ghost" ||
+                  selectedPokemonType == "steel"
+                    ? "text-zinc-200"
+                    : "text-zinc-800"
+                }`}>
+                  "{nickname}"
+                </div>
+              )}
+              <button 
+                onClick={startEdit} 
+                className={`cursor-pointer text-lg font-medium underline hover:no-underline transition-all ${
+                  selectedPokemonType == "dark" ||
+                  selectedPokemonType == "ghost" ||
+                  selectedPokemonType == "steel"
+                    ? "text-zinc-300 hover:text-zinc-100"
+                    : "text-zinc-600 hover:text-zinc-800"
+                }`}
+              >
+                {nickname ? 'Edit nickname' : 'Add nickname'}
+              </button>
+            </div>
+          )}
+        </div>
+
+        <Tabs defaultValue="about" className="w-full">
+          <TabsList className="flex items-center justify-between overflow-x-auto">
+            <TabsTrigger
+              value="about"
+              className={`${
+                selectedPokemonType == "dark" ||
+                selectedPokemonType == "ghost" ||
+                selectedPokemonType == "steel"
+                  ? "text-zinc-200 border-b-zinc-200"
+                  : ""
+              }`}
+            >
+              About
+            </TabsTrigger>
+            <TabsTrigger
+              value="stats"
+              className={`${
+                selectedPokemonType == "dark" ||
+                selectedPokemonType == "ghost" ||
+                selectedPokemonType == "steel"
+                  ? "text-zinc-200 border-b-zinc-200"
+                  : ""
+              }`}
+            >
+              Base Stats
+            </TabsTrigger>
+            <TabsTrigger
+              value="evolution"
+              className={`${
+                selectedPokemonType == "dark" ||
+                selectedPokemonType == "ghost" ||
+                selectedPokemonType == "steel"
+                  ? "text-zinc-200 border-b-zinc-200"
+                  : ""
+              }`}
+            >
+              Evolution
+            </TabsTrigger>
+          </TabsList>
+          <TabsContent value="about" className="px-3 sm:px-4 ">
+            <div className="mt-1 flex items-center flex-wrap gap-2">
+              <h3>Species:</h3>
+              <div className="ml-2 flex items-center flex-wrap">
+                {pokemon?.types.map((t) => (
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <img
+                        key={t.slot}
+                        src={`/image/pokemon-type/${t.type.name}.png`}
+                        alt={`${t.type.name} type`}
+                        className="h-8 sm:h-10 mr-1"
+                      />
+                    </TooltipTrigger>
+                    <TooltipContent>{t.type.name}</TooltipContent>
+                  </Tooltip>
+                ))}
+              </div>
+            </div>
+            <div className="flex items-center flex-wrap gap-2">
+              <h3>Abilities:</h3>
+              <div className="ml-2 flex flex-wrap items-center gap-4">
+                {pokemon?.abilities.map((a) => {
+                  let abilityName = a.ability.name
+                    .split(" ")
+                    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+                    .join(" ");
+
+                  let abilityColor = "";
+
+                  if (selectedPokemonType == "grass") {
+                    abilityColor = a.is_hidden
+                      ? "bg-[#4B9A47]"
+                      : "bg-[#65C85F]";
+                  } else if (selectedPokemonType == "water") {
+                    abilityColor = a.is_hidden
+                      ? "bg-[#2671A1]"
+                      : "bg-[#248BCD]";
+                  } else if (selectedPokemonType == "fire") {
+                    abilityColor = a.is_hidden
+                      ? "bg-[#E66007]"
+                      : "bg-[#FF823A]";
+                  } else if (selectedPokemonType == "bug") {
+                    abilityColor = a.is_hidden
+                      ? "bg-[#8DA126]"
+                      : "bg-[#B2C12C]";
+                  } else if (selectedPokemonType == "electric") {
+                    abilityColor = a.is_hidden
+                      ? "bg-[#D4BD10]"
+                      : "bg-[#F0CE24]";
+                  } else if (selectedPokemonType == "ice") {
+                    abilityColor = a.is_hidden
+                      ? "bg-[#358AC1]"
+                      : "bg-[#68B4E5]";
+                  } else if (selectedPokemonType == "poison") {
+                    abilityColor = a.is_hidden
+                      ? "bg-[#7244DF]"
+                      : "bg-[#A467EF]";
+                  } else if (selectedPokemonType == "fighting") {
+                    abilityColor = a.is_hidden
+                      ? "bg-[#A12626]"
+                      : "bg-[#CD2424]";
+                  } else if (selectedPokemonType == "ground") {
+                    abilityColor = a.is_hidden
+                      ? "bg-[#BA7E3A]"
+                      : "bg-[#D9985A]";
+                  } else if (selectedPokemonType == "psychic") {
+                    abilityColor = a.is_hidden
+                      ? "bg-[#9326A1]"
+                      : "bg-[#CD24CD]";
+                  } else if (selectedPokemonType == "flying") {
+                    abilityColor = a.is_hidden
+                      ? "bg-[#2649A1]"
+                      : "bg-[#2A67D7]";
+                  } else if (selectedPokemonType == "rock") {
+                    abilityColor = a.is_hidden
+                      ? "bg-[#AA975F]"
+                      : "bg-[#CDAE56]";
+                  } else if (selectedPokemonType == "ghost") {
+                    abilityColor = a.is_hidden
+                      ? "bg-[#3126A1]"
+                      : "bg-[#6A24CD]";
+                  } else if (selectedPokemonType == "dragon") {
+                    abilityColor = a.is_hidden
+                      ? "bg-[#002AB4]"
+                      : "bg-[#244ECD]";
+                  } else if (selectedPokemonType == "dark") {
+                    abilityColor = a.is_hidden
+                      ? "bg-[#46494B]"
+                      : "bg-[#7E7E7E]";
+                  } else if (selectedPokemonType == "steel") {
+                    abilityColor = a.is_hidden
+                      ? "bg-[#6D7579]"
+                      : "bg-[#9A9A9A]";
+                  } else if (selectedPokemonType == "fairy") {
+                    abilityColor = a.is_hidden
+                      ? "bg-[#BE2D9A]"
+                      : "bg-[#EC61C2]";
+                  } else {
+                    abilityColor = a.is_hidden
+                      ? "bg-[#7E7E62]"
+                      : "bg-[#A5A580]";
+                  }
+
+                  return (
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <span
+                          className={` text-lg sm:text-2xl px-2 py-1 mr-2 rounded-lg shadow-md text-white ${abilityColor}`}
                         >
                           {abilityName}
                         </span>
@@ -290,7 +731,7 @@ export default function PokemonInfo({
             </div>
             <div className="flex items-center">
               <h3>Height:</h3>
-              <span className="text-2xl ml-5">
+              <span className="text-xl sm:text-2xl ml-5">
                 {pokemon?.height
                   ? (pokemon?.height / 10).toFixed(2) + " m"
                   : "Unknown"}
@@ -298,7 +739,7 @@ export default function PokemonInfo({
             </div>
             <div className="flex items-center">
               <h3>Weight:</h3>
-              <span className="text-2xl ml-4">
+              <span className="text-xl sm:text-2xl ml-4">
                 {pokemon?.weight
                   ? (pokemon?.weight / 10).toFixed(2) + " kg"
                   : "Unknown"}
@@ -306,13 +747,13 @@ export default function PokemonInfo({
             </div>
             <div>
               <h3>Description</h3>
-              <p className="text-xl">{pokemon?.description}</p>
+              <p className="text-lg sm:text-xl">{pokemon?.description}</p>
             </div>
           </TabsContent>
-          <TabsContent value="stats" className="justify-center items-center">
+          <TabsContent value="stats" className="justify-center items-center px-3 sm:px-4 max-h-[40vh] overflow-y-auto">
             <div className="stats">
-              <h3>Stats</h3>
-              <ul className="flex flex-col gap-4 w-100 h-78 sm:h-68 text-xl sm:text-2xl sm:w-125 mt-3">
+              <h3 className="text-white">Stats</h3>
+              <ul className="flex flex-col gap-4 w-full max-w-full h-78 sm:h-68 text-lg sm:text-2xl sm:w-125 mt-3">
                 {pokemon?.stats.map((s) => {
                   let statName = s.stat.name
                     .split("-")
@@ -324,10 +765,10 @@ export default function PokemonInfo({
                       key={s.stat.name}
                       className="w-full flex items-center gap-4 "
                     >
-                      <span className="w-2/3">{statName}</span>
+                      <span className="w-2/3 whitespace-nowrap text-white">{statName}</span>
                       <div className="w-full flex items-center justify-between">
                         <Progress value={s.base_stat} className="w-5/6" />
-                        <span>{s.base_stat}</span>
+                        <span className="text-white">{s.base_stat}</span>
                       </div>
                     </li>
                   );
@@ -335,42 +776,42 @@ export default function PokemonInfo({
               </ul>
             </div>
           </TabsContent>
-          <TabsContent value="evolution">
+          <TabsContent value="evolution" className="px-3 sm:px-4 max-h-[40vh] overflow-y-scroll [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             <div>
-              <h3>Evolution Chain</h3>
-              <ScrollArea className="h-80 sm:h-70 lg:h-98 w-full">
-                <div className="flex items-center gap-4 flex-wrap">
+              <h3 className="text-white">Evolution Chain</h3>
+              <ScrollArea className="h-80 sm:h-80 lg:h-98 w-full">
+                <div className="flex items-center gap-4 flex-wrap p-2">
                   {pokemon?.evolutionChain &&
                   pokemon.evolutionChain.length > 1 ? (
                     pokemon.evolutionChain.map((evolution, index) => (
-                      <div key={evolution.id} className="flex items-center">
-                        <div className="bg-white/20 rounded-lg p-2 flex flex-col items-center min-w-30 h-47">
+                      <div key={evolution.id} className="flex items-center mb-4">
+                        <div className="bg-white/20 rounded-lg p-3 flex flex-col items-center min-w-32 h-52">
                           <img
                             src={evolution.image}
                             alt={evolution.name}
-                            className="w-28 h-28 object-contain"
+                            className="w-24 h-24 sm:w-28 sm:h-28 object-contain"
                           />
-                          <span className="text-lg capitalize font-semibold">
+                          <span className="text-sm sm:text-lg capitalize font-semibold text-center mt-2 text-white">
                             {evolution.name}
                           </span>
-                          <div className="flex gap-1">
+                          <div className="flex gap-1 mt-2">
                             {evolution.types.map((type) => (
                               <img
                                 key={type.slot}
                                 src={`/image/pokemon-type/${type.type.name}.png`}
                                 alt={type.type.name}
-                                className="w-7 h-7"
+                                className="w-6 h-6 sm:w-7 sm:h-7"
                               />
                             ))}
                           </div>
                         </div>
                         {index < (pokemon.evolutionChain?.length || 0) - 1 && (
-                          <span className="mx-2 text-2xl">→</span>
+                          <span className="mx-2 text-lg sm:text-xl">→</span>
                         )}
                       </div>
                     ))
                   ) : (
-                    <p className="text-lg">This Pokémon does not evolve.</p>
+                    <p className="text-base sm:text-lg p-4 text-white">This Pokémon does not evolve.</p>
                   )}
                 </div>
               </ScrollArea>
@@ -383,9 +824,9 @@ export default function PokemonInfo({
           setIsCardOpen(false);
           setSelectedPokemon(null);
         }}
-        className="absolute top-3 right-3 lg:top-5 lg:right-5 cursor-pointer z-20"
+        className="absolute top-2 right-2 sm:top-3 sm:right-3 lg:top-5 lg:right-5 cursor-pointer z-20"
       >
-        <SquareX className="w-8 h-8 lg:w-10 lg:h-10 text-zinc-900 hover:text-red-400" />
+        <SquareX className="w-7 h-7 sm:w-8 sm:h-8 lg:w-10 lg:h-10 text-zinc-900 hover:text-red-400" />
       </button>
     </Card>
   );
