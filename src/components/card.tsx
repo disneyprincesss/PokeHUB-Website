@@ -1,6 +1,7 @@
+import { memo } from "react";
 import type { PokemonListItem } from "@/types/pokemon";
 
-export default function PokemonCard({ pokemon }: { pokemon: PokemonListItem }) {
+function PokemonCardComponent({ pokemon }: { pokemon: PokemonListItem }) {
   const id = Number(pokemon.url.split("/").filter(Boolean).pop());
 
   return (
@@ -22,3 +23,6 @@ export default function PokemonCard({ pokemon }: { pokemon: PokemonListItem }) {
     </div>
   );
 }
+
+const PokemonCard = memo(PokemonCardComponent);
+export default PokemonCard;
