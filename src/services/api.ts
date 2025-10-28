@@ -10,7 +10,20 @@ export interface Pokemon {
   defense: number;
   speed: number;
   image: string;
-  nickname?: string | null;
+  customAbout?: AboutInfo | null;
+}
+
+export interface AboutInfo {
+  height: string | null;
+  weight: string | null;
+  description: string | null;
+}
+
+export interface AboutResponse {
+  data: {
+    pokemonId: number;
+    aboutInfo: AboutInfo;
+  };
 }
 
 export interface PokemonResponse {
@@ -31,12 +44,15 @@ class ApiService {
     this.baseURL = baseURL;
   }
 
-  private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+  private async request<T>(
+    endpoint: string,
+    options: RequestInit = {}
+  ): Promise<T> {
     const url = `${this.baseURL}${endpoint}`;
-    
+
     const config: RequestInit = {
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
         ...options.headers,
       },
       ...options,
@@ -44,7 +60,7 @@ class ApiService {
 
     try {
       const response = await fetch(url, config);
-      
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -54,7 +70,7 @@ class ApiService {
       }
       return await response.json();
     } catch (error) {
-      console.error('API request failed:', error);
+      console.error("API request failed:", error);
       throw error;
     }
   }
@@ -66,14 +82,14 @@ class ApiService {
     offset?: number;
   }): Promise<PokemonResponse> {
     const searchParams = new URLSearchParams();
-    
-    if (params?.type) searchParams.append('type', params.type);
-    if (params?.limit) searchParams.append('limit', params.limit.toString());
-    if (params?.offset) searchParams.append('offset', params.offset.toString());
-    
+
+    if (params?.type) searchParams.append("type", params.type);
+    if (params?.limit) searchParams.append("limit", params.limit.toString());
+    if (params?.offset) searchParams.append("offset", params.offset.toString());
+
     const queryString = searchParams.toString();
-    const endpoint = queryString ? `/pokemon?${queryString}` : '/pokemon';
-    
+    const endpoint = queryString ? `/pokemon?${queryString}` : "/pokemon";
+
     return this.request<PokemonResponse>(endpoint);
   }
 
@@ -82,35 +98,45 @@ class ApiService {
   }
 
   async searchPokemon(name: string): Promise<{ data: Pokemon[] }> {
-    return this.request<{ data: Pokemon[] }>(`/pokemon/search/${encodeURIComponent(name)}`);
+    return this.request<{ data: Pokemon[] }>(
+      `/pokemon/search/${encodeURIComponent(name)}`
+    );
   }
 
-  async createPokemon(pokemon: Omit<Pokemon, 'id'>): Promise<SinglePokemonResponse> {
-    return this.request<SinglePokemonResponse>('/pokemon', {
-      method: 'POST',
+  async createPokemon(
+    pokemon: Omit<Pokemon, "id">
+  ): Promise<SinglePokemonResponse> {
+    return this.request<SinglePokemonResponse>("/pokemon", {
+      method: "POST",
       body: JSON.stringify(pokemon),
     });
   }
 
-  // Nickname methods
-  async getNickname(id: number): Promise<{ data: { pokemonId: number; nickname: string | null } }> {
-    return this.request<{ data: { pokemonId: number; nickname: string | null } }>(`/pokemon/${id}/nickname`);
+  // Health check
+  async healthCheck(): Promise<{
+    status: string;
+    message: string;
+    timestamp: string;
+  }> {
+    return this.request<{ status: string; message: string; timestamp: string }>(
+      "/health"
+    );
   }
 
-  async setNickname(id: number, nickname: string): Promise<{ data: { pokemonId: number; nickname: string } }> {
-    return this.request<{ data: { pokemonId: number; nickname: string } }>(`/pokemon/${id}/nickname`, {
-      method: 'PUT',
-      body: JSON.stringify({ nickname }),
+  // About section methods
+  async getAboutInfo(id: number): Promise<AboutResponse> {
+    return this.request<AboutResponse>(`/pokemon/${id}/about`);
+  }
+
+  async setAboutInfo(id: number, aboutInfo: AboutInfo): Promise<AboutResponse> {
+    return this.request<AboutResponse>(`/pokemon/${id}/about`, {
+      method: "PUT",
+      body: JSON.stringify(aboutInfo),
     });
   }
 
-  async deleteNickname(id: number): Promise<void> {
-    return this.request<void>(`/pokemon/${id}/nickname`, { method: 'DELETE' });
-  }
-
-  // Health check
-  async healthCheck(): Promise<{ status: string; message: string; timestamp: string }> {
-    return this.request<{ status: string; message: string; timestamp: string }>('/health');
+  async deleteAboutInfo(id: number): Promise<void> {
+    return this.request<void>(`/pokemon/${id}/about`, { method: "DELETE" });
   }
 }
 
@@ -118,4 +144,4 @@ class ApiService {
 export const apiService = new ApiService();
 
 // Export the class for testing or custom instances
-export default ApiService;
+// export default ApiService;

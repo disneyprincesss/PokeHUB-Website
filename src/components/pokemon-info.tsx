@@ -5,8 +5,9 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 import { Progress } from "./ui/progress";
 import { ScrollArea } from "./ui/scroll-area";
 import type { PokemonDetails } from "@/types/pokemon";
-import { apiService } from "@/services/api";
+import { apiService, type AboutInfo } from "../services/api";
 import { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 
 interface PokemonInfoProps {
   pokemon: PokemonDetails | null;
@@ -21,55 +22,101 @@ export default function PokemonInfo({
 }: PokemonInfoProps) {
   const selectedPokemonType = pokemon?.types[0].type.name || "";
   const id = pokemon?.id;
-  const [nickname, setNickname] = useState<string | null>(null);
-  const [editing, setEditing] = useState(false);
-  const [input, setInput] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [aboutInfo, setAboutInfo] = useState<AboutInfo | null>(null);
+  const [editingAbout, setEditingAbout] = useState(false);
+  const [aboutInput, setAboutInput] = useState<AboutInfo>({
+    height: "",
+    weight: "",
+    description: "",
+  });
+  const [aboutLoading, setAboutLoading] = useState(false);
+  const [aboutError, setAboutError] = useState<string | null>(null);
+  const isEditMode = location.pathname.endsWith("/edit");
+
   useEffect(() => {
     if (!id) return;
-    
     let mounted = true;
-    (async () => {
+
+    const loadAboutInfo = async () => {
       try {
-        const res = await apiService.getNickname(id);
-        if (mounted) setNickname(res.data.nickname);
-      } catch (e) {
-        // ignore if endpoint not available or offline
+        const response = await apiService.getAboutInfo(id);
+        if (mounted) {
+          setAboutInfo(response.data.aboutInfo);
+        }
+      } catch (error) {
+        console.error("Failed to load about info:", error);
+        // Gracefully handle - don't show error to user
       }
-    })();
+    };
+
+    loadAboutInfo();
+
     return () => {
       mounted = false;
     };
   }, [id]);
 
-  const startEdit = () => {
-    setInput(nickname || "");
-    setEditing(true);
-    setError(null);
+  const handleEditAbout = () => {
+    setAboutInput({
+      height: aboutInfo?.height || "",
+      weight: aboutInfo?.weight || "",
+      description: aboutInfo?.description || "",
+    });
+    setEditingAbout(true);
+    setAboutError(null);
   };
 
-  const save = async () => {
-    if (!id) return;
-    
+  const handleCancelAboutEdit = () => {
+    setEditingAbout(false);
+    setAboutInput({ height: "", weight: "", description: "" });
+    setAboutError(null);
+  };
+
+  const handleSaveAbout = async () => {
+    setAboutLoading(true);
+    setAboutError(null);
+
     try {
-      setLoading(true);
-      setError(null);
-      const trimmed = input.trim();
-      if (trimmed.length === 0) {
-        await apiService.deleteNickname(id);
-        setNickname(null);
-      } else {
-        const res = await apiService.setNickname(id, trimmed);
-        setNickname(res.data.nickname);
+      // Ensure we have a pokemon id to operate on
+      if (!id) {
+        setAboutError("No Pokémon selected.");
+        return;
       }
-      setEditing(false);
-    } catch (e: any) {
-      setError(e?.message || "Failed to save nickname");
+
+      // Trim inputs safely (fields may be null)
+      const trimmedInput = {
+        height: (aboutInput.height ?? "").trim(),
+        weight: (aboutInput.weight ?? "").trim(),
+        description: (aboutInput.description ?? "").trim(),
+      };
+
+      // Check if all fields are empty (delete case)
+      const isEmpty =
+        !trimmedInput.height &&
+        !trimmedInput.weight &&
+        !trimmedInput.description;
+
+      if (isEmpty) {
+        await apiService.deleteAboutInfo(id);
+        setAboutInfo(null);
+      } else {
+        const response = await apiService.setAboutInfo(id, trimmedInput);
+        setAboutInfo(response.data.aboutInfo);
+      }
+
+      setEditingAbout(false);
+    } catch (error) {
+      console.error("Failed to save about info:", error);
+      setAboutError("Failed to save about information. Please try again.");
     } finally {
-      setLoading(false);
+      setAboutLoading(false);
     }
   };
+
+  const handleAboutInputChange = (field: keyof AboutInfo, value: string) => {
+    setAboutInput((prev) => ({ ...prev, [field]: value }));
+  };
+
   return (
     <Card
       className={`bg-gradient-to-r ${
@@ -179,71 +226,6 @@ export default function PokemonInfo({
           {pokemon?.name}
         </h1>
 
-        {/* Nickname Section */}
-        <div className="mt-4 mb-6 flex flex-col items-center lg:items-start">
-          {editing ? (
-            <div className="flex flex-col items-center lg:items-start gap-2 w-full max-w-md">
-              <input
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                maxLength={40}
-                placeholder="Enter nickname (empty to clear)"
-                className={`w-full px-3 py-2 rounded-lg border-2 focus:outline-none focus:ring-2 ${
-                  selectedPokemonType == "dark" ||
-                  selectedPokemonType == "ghost" ||
-                  selectedPokemonType == "steel"
-                    ? "bg-zinc-800 border-zinc-600 text-zinc-200 focus:ring-zinc-400"
-                    : "bg-white border-zinc-300 text-zinc-800 focus:ring-blue-500"
-                }`}
-                disabled={loading}
-              />
-              <div className="flex gap-2">
-                <button 
-                  onClick={save} 
-                  disabled={loading} 
-                  className="px-4 py-2 bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white rounded-lg font-medium transition-colors"
-                >
-                  {loading ? 'Saving...' : 'Save'}
-                </button>
-                <button 
-                  onClick={() => setEditing(false)} 
-                  disabled={loading} 
-                  className="px-4 py-2 bg-gray-500 hover:bg-gray-600 disabled:opacity-50 text-white rounded-lg font-medium transition-colors"
-                >
-                  Cancel
-                </button>
-              </div>
-              {error && <span className="text-sm text-red-500 font-medium">{error}</span>}
-            </div>
-          ) : (
-            <div className="flex flex-col items-center lg:items-start gap-2">
-              {nickname && (
-                <div className={`text-2xl font-medium ${
-                  selectedPokemonType == "dark" ||
-                  selectedPokemonType == "ghost" ||
-                  selectedPokemonType == "steel"
-                    ? "text-zinc-200"
-                    : "text-zinc-800"
-                }`}>
-                  "{nickname}"
-                </div>
-              )}
-              <button 
-                onClick={startEdit} 
-                className={`text-lg font-medium underline hover:no-underline transition-all ${
-                  selectedPokemonType == "dark" ||
-                  selectedPokemonType == "ghost" ||
-                  selectedPokemonType == "steel"
-                    ? "text-zinc-300 hover:text-zinc-100"
-                    : "text-zinc-600 hover:text-zinc-800"
-                }`}
-              >
-                {nickname ? 'Edit nickname' : 'Add nickname'}
-              </button>
-            </div>
-          )}
-        </div>
-
         <Tabs defaultValue="about">
           <TabsList>
             <TabsTrigger
@@ -284,146 +266,327 @@ export default function PokemonInfo({
             </TabsTrigger>
           </TabsList>
           <TabsContent value="about">
-            <div className="flex items-center">
-              <h3>Species:</h3>
-              <div className="ml-2 flex items-center">
-                {pokemon?.types.map((t) => (
-                  <Tooltip>
-                    <TooltipTrigger>
-                      <img
-                        key={t.slot}
-                        src={`/image/pokemon-type/${t.type.name}.png`}
-                        alt={`${t.type.name} type`}
-                        className="h-9 sm:h-10 mr-1"
-                      />
-                    </TooltipTrigger>
-                    <TooltipContent>{t.type.name}</TooltipContent>
-                  </Tooltip>
-                ))}
-              </div>
-            </div>
-            <div className="flex items-center flex-wrap">
-              <h3>Abilities:</h3>
-              <div className="ml-2 flex flex-wrap items-center">
-                {pokemon?.abilities.map((a) => {
-                  let abilityName = a.ability.name
-                    .split(" ")
-                    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-                    .join(" ");
+            <ScrollArea className="h-95 sm:h-90 lg:h-115 w-full">
+              <div className="flex flex-col gap-2">
+                <div className="flex">
+                  <h3>Species:</h3>
+                  <div className="ml-2 flex items-center">
+                    {pokemon?.types.map((t) => (
+                      <Tooltip>
+                        <TooltipTrigger>
+                          <img
+                            key={t.slot}
+                            src={`/image/pokemon-type/${t.type.name}.png`}
+                            alt={`${t.type.name} type`}
+                            className="h-9 sm:h-10 mr-1"
+                          />
+                        </TooltipTrigger>
+                        <TooltipContent>{t.type.name}</TooltipContent>
+                      </Tooltip>
+                    ))}
+                  </div>
+                </div>
+                <div className="flex items-center flex-wrap">
+                  <h3>Abilities:</h3>
+                  <div className="ml-2 flex flex-wrap items-center">
+                    {pokemon?.abilities.map((a) => {
+                      let abilityName = a.ability.name
+                        .split(" ")
+                        .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+                        .join(" ");
 
-                  let abilityColor = "";
+                      let abilityColor = "";
 
-                  if (selectedPokemonType == "grass") {
-                    abilityColor = a.is_hidden
-                      ? "bg-[#4B9A47]"
-                      : "bg-[#65C85F]";
-                  } else if (selectedPokemonType == "water") {
-                    abilityColor = a.is_hidden
-                      ? "bg-[#2671A1]"
-                      : "bg-[#248BCD]";
-                  } else if (selectedPokemonType == "fire") {
-                    abilityColor = a.is_hidden
-                      ? "bg-[#E66007]"
-                      : "bg-[#FF823A]";
-                  } else if (selectedPokemonType == "bug") {
-                    abilityColor = a.is_hidden
-                      ? "bg-[#8DA126]"
-                      : "bg-[#B2C12C]";
-                  } else if (selectedPokemonType == "electric") {
-                    abilityColor = a.is_hidden
-                      ? "bg-[#D4BD10]"
-                      : "bg-[#F0CE24]";
-                  } else if (selectedPokemonType == "ice") {
-                    abilityColor = a.is_hidden
-                      ? "bg-[#358AC1]"
-                      : "bg-[#68B4E5]";
-                  } else if (selectedPokemonType == "poison") {
-                    abilityColor = a.is_hidden
-                      ? "bg-[#7244DF]"
-                      : "bg-[#A467EF]";
-                  } else if (selectedPokemonType == "fighting") {
-                    abilityColor = a.is_hidden
-                      ? "bg-[#A12626]"
-                      : "bg-[#CD2424]";
-                  } else if (selectedPokemonType == "ground") {
-                    abilityColor = a.is_hidden
-                      ? "bg-[#BA7E3A]"
-                      : "bg-[#D9985A]";
-                  } else if (selectedPokemonType == "psychic") {
-                    abilityColor = a.is_hidden
-                      ? "bg-[#9326A1]"
-                      : "bg-[#CD24CD]";
-                  } else if (selectedPokemonType == "flying") {
-                    abilityColor = a.is_hidden
-                      ? "bg-[#2649A1]"
-                      : "bg-[#2A67D7]";
-                  } else if (selectedPokemonType == "rock") {
-                    abilityColor = a.is_hidden
-                      ? "bg-[#AA975F]"
-                      : "bg-[#CDAE56]";
-                  } else if (selectedPokemonType == "ghost") {
-                    abilityColor = a.is_hidden
-                      ? "bg-[#3126A1]"
-                      : "bg-[#6A24CD]";
-                  } else if (selectedPokemonType == "dragon") {
-                    abilityColor = a.is_hidden
-                      ? "bg-[#002AB4]"
-                      : "bg-[#244ECD]";
-                  } else if (selectedPokemonType == "dark") {
-                    abilityColor = a.is_hidden
-                      ? "bg-[#46494B]"
-                      : "bg-[#7E7E7E]";
-                  } else if (selectedPokemonType == "steel") {
-                    abilityColor = a.is_hidden
-                      ? "bg-[#6D7579]"
-                      : "bg-[#9A9A9A]";
-                  } else if (selectedPokemonType == "fairy") {
-                    abilityColor = a.is_hidden
-                      ? "bg-[#BE2D9A]"
-                      : "bg-[#EC61C2]";
-                  } else {
-                    abilityColor = a.is_hidden
-                      ? "bg-[#7E7E62]"
-                      : "bg-[#A5A580]";
-                  }
+                      if (selectedPokemonType == "grass") {
+                        abilityColor = a.is_hidden
+                          ? "bg-[#4B9A47]"
+                          : "bg-[#65C85F]";
+                      } else if (selectedPokemonType == "water") {
+                        abilityColor = a.is_hidden
+                          ? "bg-[#2671A1]"
+                          : "bg-[#248BCD]";
+                      } else if (selectedPokemonType == "fire") {
+                        abilityColor = a.is_hidden
+                          ? "bg-[#E66007]"
+                          : "bg-[#FF823A]";
+                      } else if (selectedPokemonType == "bug") {
+                        abilityColor = a.is_hidden
+                          ? "bg-[#8DA126]"
+                          : "bg-[#B2C12C]";
+                      } else if (selectedPokemonType == "electric") {
+                        abilityColor = a.is_hidden
+                          ? "bg-[#D4BD10]"
+                          : "bg-[#F0CE24]";
+                      } else if (selectedPokemonType == "ice") {
+                        abilityColor = a.is_hidden
+                          ? "bg-[#358AC1]"
+                          : "bg-[#68B4E5]";
+                      } else if (selectedPokemonType == "poison") {
+                        abilityColor = a.is_hidden
+                          ? "bg-[#7244DF]"
+                          : "bg-[#A467EF]";
+                      } else if (selectedPokemonType == "fighting") {
+                        abilityColor = a.is_hidden
+                          ? "bg-[#A12626]"
+                          : "bg-[#CD2424]";
+                      } else if (selectedPokemonType == "ground") {
+                        abilityColor = a.is_hidden
+                          ? "bg-[#BA7E3A]"
+                          : "bg-[#D9985A]";
+                      } else if (selectedPokemonType == "psychic") {
+                        abilityColor = a.is_hidden
+                          ? "bg-[#9326A1]"
+                          : "bg-[#CD24CD]";
+                      } else if (selectedPokemonType == "flying") {
+                        abilityColor = a.is_hidden
+                          ? "bg-[#2649A1]"
+                          : "bg-[#2A67D7]";
+                      } else if (selectedPokemonType == "rock") {
+                        abilityColor = a.is_hidden
+                          ? "bg-[#AA975F]"
+                          : "bg-[#CDAE56]";
+                      } else if (selectedPokemonType == "ghost") {
+                        abilityColor = a.is_hidden
+                          ? "bg-[#3126A1]"
+                          : "bg-[#6A24CD]";
+                      } else if (selectedPokemonType == "dragon") {
+                        abilityColor = a.is_hidden
+                          ? "bg-[#002AB4]"
+                          : "bg-[#244ECD]";
+                      } else if (selectedPokemonType == "dark") {
+                        abilityColor = a.is_hidden
+                          ? "bg-[#46494B]"
+                          : "bg-[#7E7E7E]";
+                      } else if (selectedPokemonType == "steel") {
+                        abilityColor = a.is_hidden
+                          ? "bg-[#6D7579]"
+                          : "bg-[#9A9A9A]";
+                      } else if (selectedPokemonType == "fairy") {
+                        abilityColor = a.is_hidden
+                          ? "bg-[#BE2D9A]"
+                          : "bg-[#EC61C2]";
+                      } else {
+                        abilityColor = a.is_hidden
+                          ? "bg-[#7E7E62]"
+                          : "bg-[#A5A580]";
+                      }
 
-                  return (
-                    <Tooltip>
-                      <TooltipTrigger>
-                        <span
-                          className={` text-xl sm:text-2xl px-2 py-1 mr-2 rounded-lg shadow-md text-white ${abilityColor}`}
+                      return (
+                        <Tooltip>
+                          <TooltipTrigger>
+                            <span
+                              className={` text-xl sm:text-2xl px-2 py-1 mr-2 rounded-lg shadow-md text-white ${abilityColor}`}
+                            >
+                              {abilityName}
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            {a.is_hidden ? "Hidden Ability" : "Normal Ability"}
+                          </TooltipContent>
+                        </Tooltip>
+                      );
+                    })}
+                  </div>
+                </div>
+                <div>
+                  {!editingAbout ? (
+                    <div className="space-y-1">
+                      {/* Display current about info */}
+                      <div className="flex flex-col gap-2">
+                        <div className="flex items-center">
+                          <h3>Height:</h3>
+                          <span className="text-2xl ml-4">
+                            {aboutInfo?.height ||
+                              (pokemon?.height
+                                ? `${(pokemon.height / 10).toFixed(2)} m`
+                                : "Unknown")}
+                          </span>
+                        </div>
+                        <div className="flex items-center">
+                          <h3>Weight:</h3>
+                          <span className="text-2xl ml-4">
+                            {aboutInfo?.weight ||
+                              (pokemon?.weight
+                                ? `${(pokemon.weight / 10).toFixed(2)} kg`
+                                : "Unknown")}
+                          </span>
+                        </div>
+                      </div>
+
+                      {(aboutInfo?.description || pokemon?.description) && (
+                        <div>
+                          <h3>Description: </h3>
+                          <p className="text-xl mt-1">
+                            {aboutInfo?.description || pokemon?.description}
+                          </p>
+                        </div>
+                      )}
+
+                      {isEditMode && (
+                        <button
+                          onClick={handleEditAbout}
+                          className={` px-3 py-1.5 text-sm rounded hover:opacity-90 transition-all ${
+                            selectedPokemonType == "dark" ||
+                            selectedPokemonType == "ghost" ||
+                            selectedPokemonType == "steel"
+                              ? "bg-zinc-600 hover:bg-zinc-700 text-zinc-200"
+                              : "bg-blue-500 hover:bg-blue-600 text-white"
+                          }`}
                         >
-                          {abilityName}
-                        </span>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        {a.is_hidden ? "Hidden Ability" : "Normal Ability"}
-                      </TooltipContent>
-                    </Tooltip>
-                  );
-                })}
+                          Customize Info
+                        </button>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="space-y-1">
+                      {/* Edit form */}
+                      <div className="flex flex-col gap-3">
+                        <div className="flex flex-col w-fit">
+                          <div className="flex gap-2 items-center">
+                            <h3>Height:</h3>
+                            <input
+                              type="text"
+                              value={aboutInput.height ?? ""}
+                              onChange={(e) =>
+                                handleAboutInputChange("height", e.target.value)
+                              }
+                              placeholder={
+                                pokemon?.height
+                                  ? `${(pokemon.height / 10).toFixed(2)} m`
+                                  : "Unknown"
+                              }
+                              className={`w-50 h-10 px-2 border rounded-md text-lg focus:outline-none focus:ring-2 ${
+                                selectedPokemonType == "dark" ||
+                                selectedPokemonType == "ghost" ||
+                                selectedPokemonType == "steel"
+                                  ? "bg-zinc-800 border-zinc-600 text-zinc-200 focus:ring-zinc-400"
+                                  : "bg-white border-gray-300 text-gray-900 focus:ring-blue-500"
+                              }`}
+                              maxLength={10}
+                            />
+                          </div>
+                          <p
+                            className={`text-xs ml-24 ${
+                              selectedPokemonType == "dark" ||
+                              selectedPokemonType == "ghost" ||
+                              selectedPokemonType == "steel"
+                                ? "text-zinc-400"
+                                : "text-gray-800"
+                            }`}
+                          >
+                            {(aboutInput.height ?? "").length}/10 characters
+                          </p>
+                        </div>
+
+                        <div className="flex flex-col w-fit">
+                          <div className="flex gap-2 items-center">
+                            <h3>Weight:</h3>
+                            <input
+                              type="text"
+                              value={aboutInput.weight ?? ""}
+                              onChange={(e) =>
+                                handleAboutInputChange("weight", e.target.value)
+                              }
+                              placeholder={
+                                pokemon?.weight
+                                  ? `${(pokemon.weight / 10).toFixed(2)} kg`
+                                  : "Unknown"
+                              }
+                              className={`w-50 h-10 px-2 border rounded-md text-lg focus:outline-none focus:ring-2 ${
+                                selectedPokemonType == "dark" ||
+                                selectedPokemonType == "ghost" ||
+                                selectedPokemonType == "steel"
+                                  ? "bg-zinc-800 border-zinc-600 text-zinc-200 focus:ring-zinc-400"
+                                  : "bg-white border-gray-300 text-gray-900 focus:ring-blue-500"
+                              }`}
+                              maxLength={10}
+                            />
+                          </div>
+                          <p
+                            className={`text-xs ml-24 ${
+                              selectedPokemonType == "dark" ||
+                              selectedPokemonType == "ghost" ||
+                              selectedPokemonType == "steel"
+                                ? "text-zinc-400"
+                                : "text-gray-800"
+                            }`}
+                          >
+                            {(aboutInput.weight ?? "").length}/10 characters
+                          </p>
+                        </div>
+                      </div>
+
+                      <div>
+                        <h3>Description</h3>
+                        <textarea
+                          value={aboutInput.description ?? ""}
+                          onChange={(e) =>
+                            handleAboutInputChange(
+                              "description",
+                              e.target.value
+                            )
+                          }
+                          placeholder={pokemon?.description}
+                          className={`w-100 lg:w-lg p-2 ml-1 border rounded-md text-lg focus:outline-none focus:ring-2 resize-none ${
+                            selectedPokemonType == "dark" ||
+                            selectedPokemonType == "ghost" ||
+                            selectedPokemonType == "steel"
+                              ? "bg-zinc-800 border-zinc-600 text-zinc-200 focus:ring-zinc-400"
+                              : "bg-white border-gray-300 text-gray-900 focus:ring-blue-500"
+                          }`}
+                          rows={4}
+                          maxLength={500}
+                        />
+                        <p
+                          className={`text-xs my-1 ml-1 ${
+                            selectedPokemonType == "dark" ||
+                            selectedPokemonType == "ghost" ||
+                            selectedPokemonType == "steel"
+                              ? "text-zinc-400"
+                              : "text-gray-800"
+                          }`}
+                        >
+                          {(aboutInput.description ?? "").length}/500 characters
+                        </p>
+                      </div>
+
+                      {aboutError && (
+                        <p className="text-red-600 text-sm">{aboutError}</p>
+                      )}
+
+                      <div className="flex gap-2">
+                        <button
+                          onClick={handleSaveAbout}
+                          disabled={aboutLoading}
+                          className="px-3 py-1.5 text-sm bg-green-500 text-white rounded hover:bg-green-600 disabled:opacity-50 transition-colors"
+                        >
+                          {aboutLoading ? "Saving..." : "Save"}
+                        </button>
+                        <button
+                          onClick={handleCancelAboutEdit}
+                          disabled={aboutLoading}
+                          className="px-3 py-1.5 text-sm bg-gray-500 text-white rounded hover:bg-gray-600 disabled:opacity-50 transition-colors"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+
+                      <p
+                        className={`text-xs ${
+                          selectedPokemonType == "dark" ||
+                          selectedPokemonType == "ghost" ||
+                          selectedPokemonType == "steel"
+                            ? "text-zinc-400"
+                            : "text-gray-800"
+                        }`}
+                      >
+                        Leave all fields empty to remove customized information
+                      </p>
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-            <div className="flex items-center">
-              <h3>Height:</h3>
-              <span className="text-2xl ml-5">
-                {pokemon?.height
-                  ? (pokemon?.height / 10).toFixed(2) + " m"
-                  : "Unknown"}
-              </span>
-            </div>
-            <div className="flex items-center">
-              <h3>Weight:</h3>
-              <span className="text-2xl ml-4">
-                {pokemon?.weight
-                  ? (pokemon?.weight / 10).toFixed(2) + " kg"
-                  : "Unknown"}
-              </span>
-            </div>
-            <div>
-              <h3>Description</h3>
-              <p className="text-xl">{pokemon?.description}</p>
-            </div>
+            </ScrollArea>
           </TabsContent>
           <TabsContent value="stats" className="justify-center items-center">
             <div className="stats">
