@@ -18,7 +18,7 @@ export default function PokemonInfo({
   setSelectedPokemon,
 }: PokemonInfoProps) {
   const selectedPokemonType = pokemon?.types[0].type.name || "";
-
+  
   return (
     <Card
       className={`bg-gradient-to-r ${
@@ -59,7 +59,7 @@ export default function PokemonInfo({
           : selectedPokemonType == "normal"
           ? "from-[#A8A878] to-[#E0E0B0]"
           : ""
-      } to-62% w-[95vw] max-w-6xl max-h-screen lg:h-[90vh] lg:max-h-170 absolute top-0 bottom-0 my-auto left-0 right-0 mx-auto flex flex-col lg:flex-row`}
+      } w-[95vw] max-w-6xl max-h-[90vh] sm:max-h-screen lg:max-h-[90vh] absolute inset-0 my-auto mx-auto flex flex-col lg:flex-row overflow-hidden rounded-2xl`}
     >
       <div className="relative w-full">
         {selectedPokemonType != "normal" && (
@@ -131,9 +131,9 @@ export default function PokemonInfo({
             <TabsTrigger value="evolution">Evolution</TabsTrigger>
           </TabsList>
           <TabsContent value="about">
-            <div className="flex items-center">
+            <div className="flex items-center gap-2">
               <h3>Species:</h3>
-              <div className="ml-2 flex items-center">
+              <div className="flex items-center flex-wrap">
                 {pokemon?.types.map((t) => (
                   <Tooltip>
                     <TooltipTrigger>
@@ -141,7 +141,7 @@ export default function PokemonInfo({
                         key={t.slot}
                         src={`/image/pokemon-type/${t.type.name}.png`}
                         alt={`${t.type.name} type`}
-                        className="h-9 sm:h-10 mr-1"
+                        className="h-8 sm:h-10 mr-1"
                       />
                     </TooltipTrigger>
                     <TooltipContent>{t.type.name}</TooltipContent>
@@ -149,9 +149,9 @@ export default function PokemonInfo({
                 ))}
               </div>
             </div>
-            <div className="flex items-center flex-wrap">
+            <div className="flex items-center flex-wrap gap-2">
               <h3>Abilities:</h3>
-              <div className="ml-2 flex flex-wrap items-center">
+              <div className="flex flex-wrap items-center">
                 {pokemon?.abilities.map((a) => {
                   let abilityName = a.ability.name
                     .split(" ")
@@ -238,7 +238,7 @@ export default function PokemonInfo({
                     <Tooltip>
                       <TooltipTrigger>
                         <span
-                          className={` text-xl sm:text-2xl px-2 py-1 mr-2 rounded-lg shadow-md text-white ${abilityColor}`}
+                          className={` text-lg sm:text-2xl px-2 py-1 mr-2 rounded-lg shadow-md text-white ${abilityColor}`}
                         >
                           {abilityName}
                         </span>
@@ -253,7 +253,7 @@ export default function PokemonInfo({
             </div>
             <div className="flex items-center">
               <h3>Height:</h3>
-              <span className="text-2xl ml-5">
+              <span className="text-xl sm:text-2xl ml-5">
                 {pokemon?.height
                   ? (pokemon?.height / 10).toFixed(2) + " m"
                   : "Unknown"}
@@ -261,7 +261,7 @@ export default function PokemonInfo({
             </div>
             <div className="flex items-center">
               <h3>Weight:</h3>
-              <span className="text-2xl ml-4">
+              <span className="text-xl sm:text-2xl ml-4">
                 {pokemon?.weight
                   ? (pokemon?.weight / 10).toFixed(2) + " kg"
                   : "Unknown"}
@@ -269,13 +269,13 @@ export default function PokemonInfo({
             </div>
             <div>
               <h3>Description</h3>
-              <p className="text-xl">{pokemon?.description}</p>
+              <p className="text-lg sm:text-xl">{pokemon?.description}</p>
             </div>
           </TabsContent>
-          <TabsContent value="stats" className="justify-center items-center">
+          <TabsContent value="stats" className="justify-center items-center px-3">
             <div className="stats">
               <h3>Stats</h3>
-              <ul className="flex flex-col gap-4 w-100 h-78 sm:h-68 text-xl sm:text-2xl sm:w-125 mt-3">
+              <ul className="flex flex-col gap-4 w-100 h-62 sm:h-68 text-xl sm:text-2xl sm:w-125 mt-3">
                 {pokemon?.stats.map((s) => {
                   let statName = s.stat.name
                     .split("-")
@@ -298,42 +298,47 @@ export default function PokemonInfo({
               </ul>
             </div>
           </TabsContent>
-          <TabsContent value="evolution">
+          <TabsContent value="evolution" className="px-3 max-h-[45vh]">
             <div>
               <h3>Evolution Chain</h3>
-              <ScrollArea className="h-80 sm:h-70 lg:h-98 w-full">
-                <div className="flex items-center gap-4 flex-wrap">
+              <ScrollArea className="h-70 lg:h-98 w-full">
+                <div className="flex items-center gap-2 flex-wrap">
                   {pokemon?.evolutionChain &&
                   pokemon.evolutionChain.length > 1 ? (
                     pokemon.evolutionChain.map((evolution, index) => (
-                      <div key={evolution.id} className="flex items-center">
-                        <div className="bg-white/20 rounded-lg p-2 flex flex-col items-center min-w-30 h-47">
+                      <div
+                        key={evolution.id}
+                        className="flex items-center"
+                      >
+                        <div className="bg-white/20 rounded-lg p-2 flex flex-col items-center w-30 sm:min-w-35 sm:h-52">
                           <img
                             src={evolution.image}
                             alt={evolution.name}
-                            className="w-28 h-28 object-contain"
+                            className="w-24 h-24 sm:w-28 sm:h-28 object-contain"
                           />
-                          <span className="text-lg capitalize font-semibold">
+                          <span className="text-sm sm:text-lg capitalize font-semibold mt-2 ">
                             {evolution.name}
                           </span>
-                          <div className="flex gap-1">
+                          <div className="flex gap-1 mt-2">
                             {evolution.types.map((type) => (
                               <img
                                 key={type.slot}
                                 src={`/image/pokemon-type/${type.type.name}.png`}
                                 alt={type.type.name}
-                                className="w-7 h-7"
+                                className="w-6 h-6 sm:w-7 sm:h-7"
                               />
                             ))}
                           </div>
                         </div>
                         {index < (pokemon.evolutionChain?.length || 0) - 1 && (
-                          <span className="mx-2 text-2xl">→</span>
+                          <span className="mx-2 text-lg sm:text-xl">→</span>
                         )}
                       </div>
                     ))
                   ) : (
-                    <p className="text-lg">This Pokémon does not evolve.</p>
+                    <p className="text-base sm:text-lg">
+                      This Pokémon does not evolve.
+                    </p>
                   )}
                 </div>
               </ScrollArea>

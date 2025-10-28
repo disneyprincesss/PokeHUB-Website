@@ -14,10 +14,10 @@ export default function LibraryPage() {
   const [pokemonList, setPokemonList] = useState<PokemonListItem[]>([]);
   const [filteredList, setFilteredList] = useState<PokemonListItem[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>("");
+  const [debouncedSearch, setDebouncedSearch] = useState<string>("");
   const [selectedType, setSelectedType] = useState<string>("");
-  const [pokemonWithTypes, setPokemonWithTypes] = useState<PokemonListItem[]>(
-    []
-  );
+  // Cache of type -> set of names for fast filtering without 800 requests
+  const [typeCache, setTypeCache] = useState<Record<string, Set<string>>>({});
 
   // All Pokemon types
   const pokemonTypes = [
@@ -42,6 +42,7 @@ export default function LibraryPage() {
   ];
 
   const [loading, setLoading] = useState<boolean>(false);
+  const [loadingTypeFilter, setLoadingTypeFilter] = useState<boolean>(false);
   const [isCardOpen, setIsCardOpen] = useState<boolean>(false);
   const [selectedPokemon, setSelectedPokemon] = useState<PokemonDetails | null>(
     null
@@ -51,55 +52,57 @@ export default function LibraryPage() {
     setLoading(true);
     fetch("https://pokeapi.co/api/v2/pokemon?limit=151")
       .then((res) => res.json())
-      .then(async (data) => {
+      .then((data) => {
         setPokemonList(data.results);
         setFilteredList(data.results);
-
-        const pokemonWithTypes = data.results.map(
-          async (pokemon: PokemonListItem) => {
-            try {
-              const response = await fetch(pokemon.url);
-              const pokemonData = await response.json();
-              return {
-                ...pokemon,
-                types: pokemonData.types.map((type: any) => type.type.name),
-              };
-            } catch (error) {
-              console.error(
-                `Failed to fetch types for ${pokemon.name}:`,
-                error
-              );
-              return { ...pokemon, types: [] };
-            }
-          }
-        );
-
-        const pokemonWithTypesData = await Promise.all(
-          pokemonWithTypes
-        );
-        setPokemonWithTypes(pokemonWithTypesData);
       })
       .finally(() => setLoading(false));
   }, []);
 
+  // Debounce search input to avoid filtering on every key stroke
   useEffect(() => {
-    let filtered = pokemonWithTypes.length > 0 ? pokemonWithTypes : pokemonList;
+    const handle = setTimeout(() => setDebouncedSearch(searchTerm.trim().toLowerCase()), 200);
+    return () => clearTimeout(handle);
+  }, [searchTerm]);
 
-    // Apply name search filter
-    if (searchTerm.trim() !== "") {
-      filtered = filtered.filter((p) =>
-        p.name.toLowerCase().includes(searchTerm.toLowerCase())
-      );
+  useEffect(() => {
+    let base = pokemonList;
+
+    if (debouncedSearch) {
+      base = base.filter((p) => p.name.toLowerCase().includes(debouncedSearch));
     }
 
-    // Apply type filter
-    if (selectedType !== "") {
-      filtered = filtered.filter((p) => p.types?.includes(selectedType));
+    // Handle type filtering via PokeAPI type endpoint, with caching
+    if (selectedType) {
+      const cached = typeCache[selectedType];
+      if (cached) {
+        const filtered = base.filter((p) => cached.has(p.name));
+        setFilteredList(filtered);
+        setCurrentPage(1);
+      } else {
+        setLoadingTypeFilter(true);
+        fetch(`https://pokeapi.co/api/v2/type/${selectedType}`)
+          .then((res) => res.json())
+          .then((data) => {
+            const names: Set<string> = new Set(
+              (data.pokemon || []).map((x: any) => x.pokemon.name)
+            );
+            setTypeCache((prev) => ({ ...prev, [selectedType]: names }));
+            const filtered = base.filter((p) => names.has(p.name));
+            setFilteredList(filtered);
+            setCurrentPage(1);
+          })
+          .catch(() => {
+            // If type fetch fails, fallback to no type filter
+            setFilteredList(base);
+          })
+          .finally(() => setLoadingTypeFilter(false));
+      }
+    } else {
+      setFilteredList(base);
+      setCurrentPage(1);
     }
-
-    setFilteredList(filtered);
-    setCurrentPage(1); // Reset to first page when filters change
-  }, [searchTerm, selectedType, pokemonList, pokemonWithTypes]);
+  }, [debouncedSearch, selectedType, pokemonList, typeCache]);
 
   const fetchPokemonDetails = async (url: string) => {
     const res = await fetch(url);
@@ -268,77 +271,78 @@ export default function LibraryPage() {
             {/* Desktop Book Layout - Hidden on mobile */}
             <div className="hidden lg:block bg-[url('/image/book.png')] bg-cover bg-center w-215 h-full">
               <div className="w-120 h-143 flex justify-center items-center relative translate-x-107">
-                {pages.map((pageData, index) => {
-                  const pageNumber = index + 1;
-
-                  const isFlipped =
-                    pageNumber <= pages.length
-                      ? currentPage >= pageNumber
-                      : false;
-
-                  let z;
-                  if (pageNumber === currentPage) {
-                    z = totalPages;
-                  } else if (pageNumber < currentPage) {
-                    z = pageNumber;
-                  } else {
-                    z = totalPages - (pageNumber - currentPage);
+                {(() => {
+                  const startIndex = Math.max(0, currentPage - 3); // render a small window around current
+                  const endIndex = Math.min(totalPages, currentPage + 2);
+                  const windowPages = [] as Array<{ pageData: PageData; pageNumber: number }>;
+                  for (let i = startIndex; i < endIndex; i++) {
+                    windowPages.push({ pageData: pages[i], pageNumber: i + 1 });
                   }
+                  return windowPages.map(({ pageData, pageNumber }) => {
+                    const isFlipped = currentPage >= pageNumber;
+                    let z;
+                    if (pageNumber === currentPage) {
+                      z = totalPages;
+                    } else if (pageNumber < currentPage) {
+                      z = pageNumber;
+                    } else {
+                      z = totalPages - (pageNumber - currentPage);
+                    }
+                    return (
+                      <div
+                        key={pageNumber}
+                        className={`pages absolute left-0 top-0 w-full h-full transition-transform duration-700 ${
+                          isFlipped ? "flip" : ""
+                        }`}
+                        style={{ zIndex: z }}
+                      >
+                        <div className="page-left w-100 h-full absolute left-0 top-0 text-zinc-900 bg-[#f9e5b7] border-l-7 border-[#e7d7a2] rounded-2xl">
+                          <div
+                            className={`left-content w-full h-full flex flex-wrap justify-center items-center ${
+                              currentPage === pageNumber || totalPages < 13
+                                ? "opacity-100 translate-x-0"
+                                : "opacity-50 -translate-x-5"
+                            } transition-all duration-500`}
+                          >
+                            {pageData.left.map((pokemon) => (
+                              <button
+                                key={pokemon.name}
+                                onClick={() => {
+                                  setIsCardOpen(true);
+                                  fetchPokemonDetails(pokemon.url);
+                                }}
+                              >
+                                <PokemonCard pokemon={pokemon} />
+                              </button>
+                            ))}
+                          </div>
+                        </div>
 
-                  return (
-                    <div
-                      key={pageNumber}
-                      className={`pages absolute left-0 top-0 w-full h-full transition-transform duration-1000 ${
-                        isFlipped ? "flip" : ""
-                      }`}
-                      style={{ zIndex: z }}
-                    >
-                      <div className="page-left w-100 h-full absolute left-0 top-0 text-zinc-900 bg-[#f9e5b7] border-l-7 border-[#e7d7a2] rounded-2xl">
-                        <div
-                          className={`left-content w-full h-full flex flex-wrap justify-center items-center ${
-                            currentPage === pageNumber || totalPages < 13
-                              ? "opacity-100 translate-x-0"
-                              : "opacity-50 -translate-x-5"
-                          } transition-all duration-800`}
-                        >
-                          {pageData.left.map((pokemon) => (
-                            <button
-                              key={pokemon.name}
-                              onClick={() => {
-                                setIsCardOpen(true);
-                                fetchPokemonDetails(pokemon.url);
-                              }}
-                            >
-                              <PokemonCard pokemon={pokemon} />
-                            </button>
-                          ))}
+                        <div className="page-right w-100 h-full absolute left-0 top-0 text-zinc-900 bg-[#f9e5b7] rounded-2xl">
+                          <div
+                            className={` w-full h-full flex flex-wrap justify-center items-center ${
+                              currentPage === pageNumber || totalPages < 13
+                                ? "opacity-100 translate-x-0"
+                                : "opacity-50 -translate-x-5"
+                            } transition-all duration-500`}
+                          >
+                            {pageData.right.map((pokemon) => (
+                              <button
+                                key={pokemon.name}
+                                onClick={() => {
+                                  setIsCardOpen(true);
+                                  fetchPokemonDetails(pokemon.url);
+                                }}
+                              >
+                                <PokemonCard pokemon={pokemon} />
+                              </button>
+                            ))}
+                          </div>
                         </div>
                       </div>
-
-                      <div className="page-right w-100 h-full absolute left-0 top-0 text-zinc-900 bg-[#f9e5b7] rounded-2xl">
-                        <div
-                          className={` w-full h-full flex flex-wrap justify-center items-center ${
-                            currentPage === pageNumber || totalPages < 13
-                              ? "opacity-100 translate-x-0"
-                              : "opacity-50 -translate-x-5"
-                          } transition-all duration-800`}
-                        >
-                          {pageData.right.map((pokemon) => (
-                            <button
-                              key={pokemon.name}
-                              onClick={() => {
-                                setIsCardOpen(true);
-                                fetchPokemonDetails(pokemon.url);
-                              }}
-                            >
-                              <PokemonCard pokemon={pokemon} />
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
+                    );
+                  });
+                })()}
               </div>
             </div>
 
