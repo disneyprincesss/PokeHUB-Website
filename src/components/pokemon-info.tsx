@@ -151,13 +151,13 @@ export default function PokemonInfo({
           : selectedPokemonType == "dark"
           ? "from-[#010101] to-[#4A4251]"
           : selectedPokemonType == "steel"
-          ? "from-[#313030] to-[#B2B2B2]"
+          ? "from-[#111111] to-[#C9C9C9]"
           : selectedPokemonType == "fairy"
           ? "from-[#9E004C] to-[#F688B6]"
           : selectedPokemonType == "normal"
           ? "from-[#A8A878] to-[#E0E0B0]"
           : ""
-      } to-62% w-[95vw] max-w-6xl max-h-screen lg:h-[90vh] lg:max-h-170 absolute top-0 bottom-0 my-auto left-0 right-0 mx-auto flex flex-col lg:flex-row`}
+      } w-[95vw] max-w-6xl max-h-[90vh] sm:max-h-screen lg:max-h-[90vh] absolute inset-0 my-auto mx-auto flex flex-col lg:flex-row overflow-hidden rounded-2xl`}
     >
       <div className="relative w-full">
         {selectedPokemonType != "normal" && (
@@ -215,11 +215,7 @@ export default function PokemonInfo({
       </div>
       <div
         className={`w-full pb-5 lg:pb-0 flex flex-col justify-center items-center lg:items-start lg:justify-start px-0 absolute bottom-0 lg:static ${
-          selectedPokemonType == "dark" ||
-          selectedPokemonType == "ghost" ||
-          selectedPokemonType == "steel"
-            ? "text-zinc-200"
-            : "text-zinc-800"
+          selectedPokemonType == "dark" ? "text-zinc-200" : "text-zinc-800"
         } `}
       >
         <h1 className="text-5xl sm:text-7xl lg:text-8xl font-jersey font-bold uppercase tracking-wider text-shadow-[5px_5px_6px_rgba(0,0,0,0.5)] sm:text-shadow-[8px_8px_10px_rgba(0,0,0,0.5)] text-center lg:text-left z-10">
@@ -228,42 +224,9 @@ export default function PokemonInfo({
 
         <Tabs defaultValue="about">
           <TabsList>
-            <TabsTrigger
-              value="about"
-              className={`${
-                selectedPokemonType == "dark" ||
-                selectedPokemonType == "ghost" ||
-                selectedPokemonType == "steel"
-                  ? "text-zinc-200 border-b-zinc-200"
-                  : ""
-              }`}
-            >
-              About
-            </TabsTrigger>
-            <TabsTrigger
-              value="stats"
-              className={`${
-                selectedPokemonType == "dark" ||
-                selectedPokemonType == "ghost" ||
-                selectedPokemonType == "steel"
-                  ? "text-zinc-200 border-b-zinc-200"
-                  : ""
-              }`}
-            >
-              Base Stats
-            </TabsTrigger>
-            <TabsTrigger
-              value="evolution"
-              className={`${
-                selectedPokemonType == "dark" ||
-                selectedPokemonType == "ghost" ||
-                selectedPokemonType == "steel"
-                  ? "text-zinc-200 border-b-zinc-200"
-                  : ""
-              }`}
-            >
-              Evolution
-            </TabsTrigger>
+            <TabsTrigger value="about">About</TabsTrigger>
+            <TabsTrigger value="stats">Base Stats</TabsTrigger>
+            <TabsTrigger value="evolution">Evolution</TabsTrigger>
           </TabsList>
           <TabsContent value="about">
             <ScrollArea className="h-95 sm:h-90 lg:h-115 w-full">
@@ -588,10 +551,10 @@ export default function PokemonInfo({
               </div>
             </ScrollArea>
           </TabsContent>
-          <TabsContent value="stats" className="justify-center items-center">
+          <TabsContent value="stats" className="justify-center items-center px-3">
             <div className="stats">
               <h3>Stats</h3>
-              <ul className="flex flex-col gap-4 w-100 h-78 sm:h-68 text-xl sm:text-2xl sm:w-125 mt-3">
+              <ul className="flex flex-col gap-4 w-100 h-62 sm:h-68 text-xl sm:text-2xl sm:w-125 mt-3">
                 {pokemon?.stats.map((s) => {
                   let statName = s.stat.name
                     .split("-")
@@ -614,42 +577,47 @@ export default function PokemonInfo({
               </ul>
             </div>
           </TabsContent>
-          <TabsContent value="evolution">
+          <TabsContent value="evolution" className="px-3 max-h-[45vh]">
             <div>
               <h3>Evolution Chain</h3>
-              <ScrollArea className="h-80 sm:h-70 lg:h-98 w-full">
-                <div className="flex items-center gap-4 flex-wrap">
+              <ScrollArea className="h-70 lg:h-98 w-full">
+                <div className="flex items-center gap-2 flex-wrap">
                   {pokemon?.evolutionChain &&
                   pokemon.evolutionChain.length > 1 ? (
                     pokemon.evolutionChain.map((evolution, index) => (
-                      <div key={evolution.id} className="flex items-center">
-                        <div className="bg-white/20 rounded-lg p-2 flex flex-col items-center min-w-30 h-47">
+                      <div
+                        key={evolution.id}
+                        className="flex items-center"
+                      >
+                        <div className="bg-white/20 rounded-lg p-2 flex flex-col items-center w-30 sm:min-w-35 sm:h-52">
                           <img
                             src={evolution.image}
                             alt={evolution.name}
-                            className="w-28 h-28 object-contain"
+                            className="w-24 h-24 sm:w-28 sm:h-28 object-contain"
                           />
-                          <span className="text-lg capitalize font-semibold">
+                          <span className="text-sm sm:text-lg capitalize font-semibold mt-2 ">
                             {evolution.name}
                           </span>
-                          <div className="flex gap-1">
+                          <div className="flex gap-1 mt-2">
                             {evolution.types.map((type) => (
                               <img
                                 key={type.slot}
                                 src={`/image/pokemon-type/${type.type.name}.png`}
                                 alt={type.type.name}
-                                className="w-7 h-7"
+                                className="w-6 h-6 sm:w-7 sm:h-7"
                               />
                             ))}
                           </div>
                         </div>
                         {index < (pokemon.evolutionChain?.length || 0) - 1 && (
-                          <span className="mx-2 text-2xl">→</span>
+                          <span className="mx-2 text-lg sm:text-xl">→</span>
                         )}
                       </div>
                     ))
                   ) : (
-                    <p className="text-lg">This Pokémon does not evolve.</p>
+                    <p className="text-base sm:text-lg">
+                      This Pokémon does not evolve.
+                    </p>
                   )}
                 </div>
               </ScrollArea>

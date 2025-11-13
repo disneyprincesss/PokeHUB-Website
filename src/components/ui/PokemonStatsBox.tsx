@@ -21,7 +21,9 @@ export default function PokemonStatsBox({
 
   const isTopRight = pokemonStatus.position === "top-right";
 
-  const positionStyles = isTopRight ? "-top-25 -right-35 sm:-top-20 sm:-right-35" : "-bottom-20 -left-8 sm:-bottom-20 sm:-left-35";
+  const positionStyles = isTopRight 
+    ? "-top-16 left-1/2 transform -translate-x-1/2 z-25 sm:-top-25 sm:-right-35 sm:left-auto sm:transform-none" 
+    : "-bottom-16 left-1/2 transform -translate-x-1/2 z-35 sm:-bottom-25 sm:left-20";
 
   return (
     <div
