@@ -151,7 +151,7 @@ export default function PokemonInfo({
           : selectedPokemonType == "dark"
           ? "from-[#010101] to-[#4A4251]"
           : selectedPokemonType == "steel"
-          ? "from-[#111111] to-[#C9C9C9]"
+          ? "from-[#313030] to-[#B2B2B2]"
           : selectedPokemonType == "fairy"
           ? "from-[#9E004C] to-[#F688B6]"
           : selectedPokemonType == "normal"
@@ -215,7 +215,11 @@ export default function PokemonInfo({
       </div>
       <div
         className={`w-full pb-5 lg:pb-0 flex flex-col justify-center items-center lg:items-start lg:justify-start px-0 absolute bottom-0 lg:static ${
-          selectedPokemonType == "dark" ? "text-zinc-200" : "text-zinc-800"
+          selectedPokemonType == "dark" ||
+          selectedPokemonType == "ghost" ||
+          selectedPokemonType == "steel"
+            ? "text-zinc-200"
+            : "text-zinc-800"
         } `}
       >
         <h1 className="text-5xl sm:text-7xl lg:text-8xl font-jersey font-bold uppercase tracking-wider text-shadow-[5px_5px_6px_rgba(0,0,0,0.5)] sm:text-shadow-[8px_8px_10px_rgba(0,0,0,0.5)] text-center lg:text-left z-10">
@@ -224,12 +228,45 @@ export default function PokemonInfo({
 
         <Tabs defaultValue="about">
           <TabsList>
-            <TabsTrigger value="about">About</TabsTrigger>
-            <TabsTrigger value="stats">Base Stats</TabsTrigger>
-            <TabsTrigger value="evolution">Evolution</TabsTrigger>
+            <TabsTrigger
+              value="about"
+              className={`${
+                selectedPokemonType == "dark" ||
+                selectedPokemonType == "ghost" ||
+                selectedPokemonType == "steel"
+                  ? "text-zinc-200 border-b-zinc-200"
+                  : ""
+              }`}
+            >
+              About
+            </TabsTrigger>
+            <TabsTrigger
+              value="stats"
+              className={`${
+                selectedPokemonType == "dark" ||
+                selectedPokemonType == "ghost" ||
+                selectedPokemonType == "steel"
+                  ? "text-zinc-200 border-b-zinc-200"
+                  : ""
+              }`}
+            >
+              Base Stats
+            </TabsTrigger>
+            <TabsTrigger
+              value="evolution"
+              className={`${
+                selectedPokemonType == "dark" ||
+                selectedPokemonType == "ghost" ||
+                selectedPokemonType == "steel"
+                  ? "text-zinc-200 border-b-zinc-200"
+                  : ""
+              }`}
+            >
+              Evolution
+            </TabsTrigger>
           </TabsList>
           <TabsContent value="about">
-            <ScrollArea className="h-95 sm:h-90 lg:h-115 w-full">
+            <ScrollArea className="h-80 sm:h-90 lg:h-115 w-full">
               <div className="flex flex-col gap-2">
                 <div className="flex">
                   <h3>Species:</h3>
@@ -551,7 +588,10 @@ export default function PokemonInfo({
               </div>
             </ScrollArea>
           </TabsContent>
-          <TabsContent value="stats" className="justify-center items-center px-3">
+          <TabsContent
+            value="stats"
+            className="justify-center items-center px-3"
+          >
             <div className="stats">
               <h3>Stats</h3>
               <ul className="flex flex-col gap-4 w-100 h-62 sm:h-68 text-xl sm:text-2xl sm:w-125 mt-3">
@@ -585,10 +625,7 @@ export default function PokemonInfo({
                   {pokemon?.evolutionChain &&
                   pokemon.evolutionChain.length > 1 ? (
                     pokemon.evolutionChain.map((evolution, index) => (
-                      <div
-                        key={evolution.id}
-                        className="flex items-center"
-                      >
+                      <div key={evolution.id} className="flex items-center">
                         <div className="bg-white/20 rounded-lg p-2 flex flex-col items-center w-30 sm:min-w-35 sm:h-52">
                           <img
                             src={evolution.image}

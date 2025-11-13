@@ -13,7 +13,7 @@ export default function BattleUI({ battle }: { battle: BattleUIProps }) {
   );
 
   return (
-    <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 z-10 sm:bottom-10 sm:right-3 sm:left-auto sm:transform-none md:right-5 lg:right-10 bg-[#fff8dcf2] border-3 border-[#8B4513] rounded-lg p-2 sm:p-4 min-w-[200px] max-w-[250px] sm:min-w-[220px] sm:max-w-[275px] md:min-w-[320px] md:max-w-[400px] shadow-lg">
+    <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 z-3 sm:bottom-10 sm:right-3 sm:left-auto sm:transform-none md:right-5 lg:right-10 bg-[#fff8dcf2] border-3 border-[#8B4513] rounded-lg p-2 sm:p-4 min-w-[200px] max-w-[250px] sm:min-w-[220px] sm:max-w-[275px] md:min-w-[320px] md:max-w-[400px] shadow-lg">
       {/* Turn Status */}
       <div className="mb-2 font-bold text-[#2c5234] text-center text-sm sm:text-lg border-b-2 border-[#8B4513] pb-2 capitalize">
         {battle.winner
