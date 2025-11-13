@@ -42,7 +42,7 @@ export default function LibraryPage() {
   ];
 
   const [loading, setLoading] = useState<boolean>(false);
-  const [loadingTypeFilter, setLoadingTypeFilter] = useState<boolean>(false);
+  // const [loadingTypeFilter, setLoadingTypeFilter] = useState<boolean>(false); 
   const [isCardOpen, setIsCardOpen] = useState<boolean>(false);
   const [selectedPokemon, setSelectedPokemon] = useState<PokemonDetails | null>(
     null
@@ -80,7 +80,6 @@ export default function LibraryPage() {
         setFilteredList(filtered);
         setCurrentPage(1);
       } else {
-        setLoadingTypeFilter(true);
         fetch(`https://pokeapi.co/api/v2/type/${selectedType}`)
           .then((res) => res.json())
           .then((data) => {
@@ -95,8 +94,7 @@ export default function LibraryPage() {
           .catch(() => {
             // If type fetch fails, fallback to no type filter
             setFilteredList(base);
-          })
-          .finally(() => setLoadingTypeFilter(false));
+          });
       }
     } else {
       setFilteredList(base);

@@ -94,4 +94,18 @@ export interface PokemonDetails {
   description?: string;
   image?: string;
   evolutionChain?: EvolutionPokemon[];
+  customAbout?: AboutInfo | null;
+}
+
+export interface AboutInfo {
+  height: string | null;
+  weight: string | null;
+  description: string | null;
+}
+
+export interface AboutResponse {
+  data: {
+    pokemonId: number;
+    aboutInfo: AboutInfo;
+  };
 }

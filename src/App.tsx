@@ -18,6 +18,10 @@ function App() {
       path: "/battle",
       element: <BattlePage />,
     },
+    {
+      path: "/library/edit",
+      element: <LibraryPage />,
+    },
   ]);
 
   return (
